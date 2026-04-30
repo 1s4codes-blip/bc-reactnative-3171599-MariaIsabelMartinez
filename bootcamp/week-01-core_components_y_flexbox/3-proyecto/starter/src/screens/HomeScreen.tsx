@@ -14,65 +14,55 @@ import {
   SafeAreaView,
   StatusBar,
 } from 'react-native';
-import { Item } from '../types';
+import { Supplier } from '../types';
 import { ItemCard } from '../components/ItemCard';
 import { MOCK_ITEMS } from '../data/mockData';
 
 export function HomeScreen(): React.JSX.Element {
-  // TODO: Personaliza el título con el nombre de tu dominio
-  // Ejemplos: 'Mi Biblioteca', 'Farmacia Central', 'GymApp', 'Menú del Día'
-  const DOMAIN_TITLE = 'Mi App';
-  const DOMAIN_SUBTITLE = 'Subtítulo del dominio';
+  const DOMAIN_TITLE = 'Import Company';
+  const DOMAIN_SUBTITLE = 'Supplier management';
 
-  /**
-   * Handles item card press.
-   * For now, just logs the item name. In week-03 we'll add navigation.
-   */
-  function handleItemPress(item: Item): void {
-    // TODO: Mostrar un alert o log con el nombre del item
-    console.log('Item seleccionado:', item.name);
+  function handleItemPress(item: Supplier): void {
+    console.log('Selected supplier:', item.name); 
+  }
+
+    const rows: Supplier[][] = [];
+  for (let i = 0; i < MOCK_ITEMS.length; i += 2) {
+    rows.push(MOCK_ITEMS.slice(i, i + 2));
   }
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" backgroundColor="#0d1117" />
 
-      {/* ============================================
-          TODO: Implementar el Header de la app
-          Debe mostrar: título del dominio y subtítulo
-          Usa flexDirection: 'column' o 'row' según el diseño
-          ============================================ */}
+      {}
       <View style={styles.header}>
+        <View style={styles.headerAccent} />
         <Text style={styles.headerTitle}>{DOMAIN_TITLE}</Text>
         <Text style={styles.headerSubtitle}>{DOMAIN_SUBTITLE}</Text>
       </View>
 
-      {/* ============================================
-          TODO: Implementar la lista de tarjetas
-          Usa ScrollView para permitir scroll vertical
-          Renderiza un ItemCard por cada elemento en MOCK_ITEMS
-          ============================================ */}
+      {}
       <ScrollView
         style={styles.listContainer}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
-      >
-        {/* TODO: Reemplaza este placeholder por el render real de las tarjetas */}
-        {/* Ejemplo de cómo renderizar la lista:
-        {MOCK_ITEMS.map((item) => (
-          <ItemCard
-            key={item.id}
-            item={item}
-            onPress={handleItemPress}
-          />
+      > 
+
+ {}
+        {rows.map((row, rowIndex) => (
+          <View key={rowIndex} style={styles.row}>
+            {row.map((item) => (
+              <ItemCard
+                key={item.id}
+                item={item}
+                onPress={handleItemPress}
+              />
+            ))}
+            {/* Si la fila tiene solo 1 item, agrega espacio vacío */}
+            {row.length === 1 && <View style={styles.emptyCell} />}
+          </View>
         ))}
-        */}
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyText}>Lista de tarjetas — por implementar</Text>
-          <Text style={styles.emptyHint}>
-            Renderiza los {MOCK_ITEMS.length} items de MOCK_ITEMS usando ItemCard
-          </Text>
-        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -83,13 +73,19 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#0d1117',
   },
-
-  // Header — TODO: ajusta según el diseño de tu dominio
+  // Header — nombre y subtítulo del dominio
   header: {
     paddingHorizontal: 16,
     paddingVertical: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#30363d',
+    borderBottomColor: '#2d3448',
+  },
+    headerAccent: {
+    height: 3,
+    backgroundColor: '#58a6ff',
+    borderRadius: 2,
+    marginBottom: 12,
+    width: 40,
   },
   headerTitle: {
     fontSize: 28,
@@ -98,31 +94,22 @@ const styles = StyleSheet.create({
   },
   headerSubtitle: {
     fontSize: 14,
-    color: '#8b949e',
+    color: '#58a6ff',
     marginTop: 4,
   },
 
-  // List
   listContainer: {
     flex: 1,
   },
   listContent: {
-    padding: 16,
+    padding: 10,
   },
-
-  // Empty state placeholder — elimina cuando implementes la lista real
-  emptyState: {
-    alignItems: 'center',
-    paddingTop: 60,
-    gap: 8,
+    row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
-  emptyText: {
-    color: '#8b949e',
-    fontSize: 16,
-  },
-  emptyHint: {
-    color: '#30363d',
-    fontSize: 13,
-    textAlign: 'center',
+    emptyCell: {
+    flex: 1,
+    margin: 6,
   },
 });
