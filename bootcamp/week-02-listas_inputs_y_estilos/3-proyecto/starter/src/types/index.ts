@@ -1,21 +1,20 @@
 // ============================================
 // TYPES — Semana 02
-// Define aquí la interfaz de tu dominio
+// Import domain: Import Company
 // ============================================
+
+export type ShipmentStatus = 'in_transit' | 'delivered' | 'pending' | 'delayed';
+export type CustomsStatus = 'cleared' | 'in_review' | 'hold';
 
 export interface Item {
   id: string;
-  /** Nombre o título principal del elemento */
   name: string;
-  // TODO: Agregar campos específicos de tu dominio
-  // Ejemplos:
-  //   Biblioteca  → author: string; available: boolean;
-  //   Farmacia    → price: number; stock: number; category: string;
-  //   Gimnasio    → plan: 'básico' | 'premium'; expiresAt: string;
-  //   Restaurante → price: number; category: string; available: boolean;
-  //   Hotel       → roomType: string; pricePerNight: number; status: 'libre' | 'ocupado';
+  supplier: string; 
+  origin: string; 
+  category: 'electronics' | 'textiles' | 'machinery' | 'food' | 'chemicals';
+  unitPrice: number; 
+  quantity: number;
+  shipmentStatus: ShipmentStatus;
+  customsStatus: CustomsStatus;
+  arrivalDate: string; 
 }
-
-// TODO: Si necesitas tipos auxiliares (enums, categorías, etc.), defínelos aquí
-// Ejemplo:
-// export type ItemCategory = 'categoria_a' | 'categoria_b' | 'categoria_c';

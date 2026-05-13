@@ -1,15 +1,15 @@
 import React from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { SafeAreaView, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { COLORS } from './src/theme';
 
 export default function App(): React.JSX.Element {
   return (
-    <SafeAreaView style={styles.container}>
+    <View  style={styles.container}>
       <StatusBar style="light" backgroundColor={COLORS.background} />
       <HomeScreen />
-    </SafeAreaView>
+    </View >
   );
 }
 

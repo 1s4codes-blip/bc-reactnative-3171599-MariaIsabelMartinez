@@ -1,68 +1,148 @@
 import { Item } from '../types';
 
-// ============================================
-// MOCK DATA — Semana 02
-// Reemplaza estos items genéricos con datos
-// reales de tu dominio asignado.
-//
-// REQUISITO: mínimo 10 items
-// ============================================
-
-// TODO: Renombra ITEMS a algo descriptivo de tu dominio
-//       Ejemplo: BOOKS, MEDICINES, MEMBERS, DISHES...
-// TODO: Actualiza el tipo Item con los campos de tu dominio
-// TODO: Rellena con datos reales y variados de tu dominio
-
-export const ITEMS: Item[] = [
+export const IMPORTS: Item[] = [
   {
     id: '1',
-    name: 'Elemento 01',
-    // TODO: agregar campos de tu dominio
+    name: 'Industrial Laser Cutter',
+    supplier: 'Shenzhen MechTech Co.',
+    origin: 'China',
+    category: 'machinery',
+    unitPrice: 8500,
+    quantity: 2,
+    shipmentStatus: 'in_transit',
+    customsStatus: 'in_review',
+    arrivalDate: '2025-06-10',
   },
   {
     id: '2',
-    name: 'Elemento 02',
-    // TODO: agregar campos de tu dominio
+    name: 'Organic Cotton Fabric',
+    supplier: 'Bangladesh Textile Mills',
+    origin: 'Bangladesh',
+    category: 'textiles',
+    unitPrice: 4.5,
+    quantity: 3000,
+    shipmentStatus: 'delivered',
+    customsStatus: 'cleared',
+    arrivalDate: '2025-05-01',
   },
   {
     id: '3',
-    name: 'Elemento 03',
-    // TODO: agregar campos de tu dominio
+    name: 'RTX 4090 GPU Batch',
+    supplier: 'Taiwan Silicon Corp.',
+    origin: 'Taiwan',
+    category: 'electronics',
+    unitPrice: 1200,
+    quantity: 50,
+    shipmentStatus: 'pending',
+    customsStatus: 'in_review',
+    arrivalDate: '2025-06-25',
   },
   {
     id: '4',
-    name: 'Elemento 04',
-    // TODO: agregar campos de tu dominio
+    name: 'Extra Virgin Olive Oil',
+    supplier: 'Aceites del Sur S.L.',
+    origin: 'Spain',
+    category: 'food',
+    unitPrice: 12,
+    quantity: 500,
+    shipmentStatus: 'delivered',
+    customsStatus: 'cleared',
+    arrivalDate: '2025-04-20',
   },
   {
     id: '5',
-    name: 'Elemento 05',
-    // TODO: agregar campos de tu dominio
+    name: 'Hydraulic Press Machine',
+    supplier: 'Maschinenbau GmbH',
+    origin: 'Germany',
+    category: 'machinery',
+    unitPrice: 22000,
+    quantity: 1,
+    shipmentStatus: 'delayed',
+    customsStatus: 'hold',
+    arrivalDate: '2025-07-03',
   },
   {
     id: '6',
-    name: 'Elemento 06',
-    // TODO: agregar campos de tu dominio
+    name: 'Polyethylene Pellets',
+    supplier: 'Gulf Chem Industries',
+    origin: 'Saudi Arabia',
+    category: 'chemicals',
+    unitPrice: 1.8,
+    quantity: 10000,
+    shipmentStatus: 'in_transit',
+    customsStatus: 'in_review',
+    arrivalDate: '2025-06-15',
   },
   {
     id: '7',
-    name: 'Elemento 07',
-    // TODO: agregar campos de tu dominio
+    name: 'Wireless Earbuds Pro',
+    supplier: 'Shenzhen AudioTech',
+    origin: 'China',
+    category: 'electronics',
+    unitPrice: 45,
+    quantity: 200,
+    shipmentStatus: 'delivered',
+    customsStatus: 'cleared',
+    arrivalDate: '2025-05-12',
   },
   {
     id: '8',
-    name: 'Elemento 08',
-    // TODO: agregar campos de tu dominio
+    name: 'Denim Jeans Bulk',
+    supplier: 'Dhaka Fashion Ltd.',
+    origin: 'Bangladesh',
+    category: 'textiles',
+    unitPrice: 9,
+    quantity: 1500,
+    shipmentStatus: 'in_transit',
+    customsStatus: 'cleared',
+    arrivalDate: '2025-06-08',
   },
   {
     id: '9',
-    name: 'Elemento 09',
-    // TODO: agregar campos de tu dominio
+    name: 'Arabica Coffee Beans',
+    supplier: 'Exportadora Café S.A.',
+    origin: 'Colombia',
+    category: 'food',
+    unitPrice: 7.5,
+    quantity: 800,
+    shipmentStatus: 'pending',
+    customsStatus: 'in_review',
+    arrivalDate: '2025-07-01',
   },
   {
     id: '10',
-    name: 'Elemento 10',
-    // TODO: agregar campos de tu dominio
+    name: 'CNC Milling Machine',
+    supplier: 'Osaka Precision Tools',
+    origin: 'Japan',
+    category: 'machinery',
+    unitPrice: 31000,
+    quantity: 1,
+    shipmentStatus: 'in_transit',
+    customsStatus: 'cleared',
+    arrivalDate: '2025-06-20',
   },
-  // TODO: puedes agregar más items para hacer la demo más rica
+  {
+    id: '11',
+    name: 'Isopropyl Alcohol 99%',
+    supplier: 'ChemSupply Korea',
+    origin: 'South Korea',
+    category: 'chemicals',
+    unitPrice: 3.2,
+    quantity: 5000,
+    shipmentStatus: 'delivered',
+    customsStatus: 'cleared',
+    arrivalDate: '2025-05-05',
+  },
+  {
+    id: '12',
+    name: 'Smart Home Hub v3',
+    supplier: 'Shenzhen IoT Systems',
+    origin: 'China',
+    category: 'electronics',
+    unitPrice: 85,
+    quantity: 150,
+    shipmentStatus: 'delayed',
+    customsStatus: 'hold',
+    arrivalDate: '2025-06-30',
+  },
 ];

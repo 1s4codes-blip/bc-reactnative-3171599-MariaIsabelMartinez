@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
-import { Item } from '../types';
+import { Item, ShipmentStatus, CustomsStatus } from '../types';
 import { COLORS, TYPOGRAPHY, SPACING, RADIUS } from '../theme';
 
 interface ItemCardProps {
@@ -8,11 +8,41 @@ interface ItemCardProps {
   onPress: (item: Item) => void;
 }
 
-/**
- * Tarjeta reutilizable para mostrar un elemento del dominio.
- * Personaliza el contenido según los campos de tu interfaz Item.
- */
+const SHIPMENT_COLORS: Record<ShipmentStatus, { bg: string; text: string }> = {
+  delivered:  { bg: '#3fb95022', text: COLORS.success },
+  in_transit: { bg: '#58a6ff22', text: COLORS.info },
+  pending:    { bg: '#f0883e22', text: COLORS.warning },
+  delayed:    { bg: '#f8514922', text: COLORS.error },
+};
+
+const CUSTOMS_COLORS: Record<CustomsStatus, { bg: string; text: string }> = {
+  cleared:   { bg: '#3fb95022', text: COLORS.success },
+  in_review: { bg: '#f0883e22', text: COLORS.warning },
+  hold:      { bg: '#f8514922', text: COLORS.error },
+};
+
+const SHIPMENT_LABELS: Record<ShipmentStatus, string> = {
+  delivered:  'Delivered',
+  in_transit: 'In Transit',
+  pending:    'Pending',
+  delayed:    'Delayed',
+};
+
+const CUSTOMS_LABELS: Record<CustomsStatus, string> = {
+  cleared:   'Cleared',
+  in_review: 'In Review',
+  hold:      'Hold',
+};
+
 export function ItemCard({ item, onPress }: ItemCardProps): React.JSX.Element {
+  const shipmentColor = SHIPMENT_COLORS[item.shipmentStatus];
+  const customsColor = CUSTOMS_COLORS[item.customsStatus];
+  const totalValue = (item.unitPrice * item.quantity).toLocaleString('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  });
+
   return (
     <Pressable
       style={({ pressed }) => [
@@ -23,30 +53,43 @@ export function ItemCard({ item, onPress }: ItemCardProps): React.JSX.Element {
       accessibilityRole="button"
       accessibilityLabel={item.name}
     >
-      {/* Nombre principal del elemento */}
-      <Text style={styles.itemName}>{item.name}</Text>
-
-      {/* TODO: Mostrar los campos adicionales de tu dominio */}
-      {/* Ejemplos:
-        Biblioteca:
-          <Text style={styles.fieldText}>{item.author}</Text>
-          <Text style={styles.fieldText}>{item.available ? 'Disponible' : 'Prestado'}</Text>
-
-        Farmacia:
-          <Text style={styles.fieldText}>${item.price}</Text>
-          <Text style={styles.fieldText}>Stock: {item.stock}</Text>
-
-        Gimnasio:
-          <Text style={styles.fieldText}>Plan: {item.plan}</Text>
-          <Text style={styles.fieldText}>Vence: {item.expiresAt}</Text>
-      */}
-
-      {/* TODO: Si tu dominio tiene un badge de estado/categoría, agrégalo aquí */}
-      {/* Ejemplo:
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>{item.category}</Text>
+      {/* Header: name + category badge */}
+      <View style={styles.header}>
+        <Text style={styles.itemName} numberOfLines={1}>{item.name}</Text>
+        <View style={styles.categoryBadge}>
+          <Text style={styles.categoryText}>{item.category}</Text>
         </View>
-      */}
+      </View>
+
+      {/* Supplier and origin */}
+      <Text style={styles.fieldText}>🏭 {item.supplier}</Text>
+      <Text style={styles.fieldText}>🌍 {item.origin}</Text>
+
+       {/* Price row */}
+      <Text style={styles.priceText}>
+        {totalValue}
+        <Text style={styles.qtyText}>  ×{item.quantity} units</Text>
+      </Text>
+
+      {/* Status badges row */}
+      <View style={styles.badgeRow}>
+        {/* Shipment status */}
+        <View style={[styles.badge, { backgroundColor: shipmentColor.bg }]}>
+          <Text style={[styles.badgeText, { color: shipmentColor.text }]}>
+            {SHIPMENT_LABELS[item.shipmentStatus]}
+          </Text>
+        </View>
+
+        {/* Customs status */}
+        <View style={[styles.badge, { backgroundColor: customsColor.bg }]}>
+          <Text style={[styles.badgeText, { color: customsColor.text }]}>
+            Customs: {CUSTOMS_LABELS[item.customsStatus]}
+          </Text>
+        </View>
+      </View>
+
+        {/* Arrival date */}
+      <Text style={styles.dateText}>📅 ETA: {item.arrivalDate}</Text>
     </Pressable>
   );
 }
@@ -64,29 +107,66 @@ const styles = StyleSheet.create({
   cardPressed: {
     backgroundColor: COLORS.surfaceAlt,
   },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: SPACING.sm,
+    gap: SPACING.sm,
+  },
   itemName: {
+    flex: 1,
     fontSize: TYPOGRAPHY.size.md,
     fontWeight: TYPOGRAPHY.weight.semibold,
     color: COLORS.textPrimary,
-    marginBottom: SPACING.xs,
   },
-  fieldText: {
-    fontSize: TYPOGRAPHY.size.sm,
-    color: COLORS.textSecondary,
-    marginBottom: 2,
-  },
-  badge: {
-    alignSelf: 'flex-start',
-    marginTop: SPACING.sm,
+  categoryBadge: {
     paddingHorizontal: SPACING.sm,
     paddingVertical: 3,
     borderRadius: RADIUS.full,
     backgroundColor: COLORS.accentDim,
   },
-  badgeText: {
+  categoryText: {
     fontSize: TYPOGRAPHY.size.xs,
     fontWeight: TYPOGRAPHY.weight.semibold,
     color: COLORS.accent,
     textTransform: 'capitalize',
+  },
+  fieldText: {
+    fontSize: TYPOGRAPHY.size.sm,
+    color: COLORS.textSecondary,
+    marginBottom: 3,
+  },
+  priceText: {
+    fontSize: TYPOGRAPHY.size.base,
+    fontWeight: TYPOGRAPHY.weight.bold,
+    color: COLORS.textPrimary,
+    marginTop: SPACING.sm,
+    marginBottom: SPACING.sm,
+  },
+  qtyText: {
+    fontSize: TYPOGRAPHY.size.sm,
+    fontWeight: TYPOGRAPHY.weight.regular,
+    color: COLORS.textSecondary,
+  },
+  badgeRow: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+    flexWrap: 'wrap',
+    marginBottom: SPACING.sm,
+  },
+  badge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 3,
+    borderRadius: RADIUS.full,
+  },
+  badgeText: {
+    fontSize: TYPOGRAPHY.size.xs,
+    fontWeight: TYPOGRAPHY.weight.semibold,
+  },
+  dateText: {
+    fontSize: TYPOGRAPHY.size.xs,
+    color: COLORS.textMuted,
   },
 });

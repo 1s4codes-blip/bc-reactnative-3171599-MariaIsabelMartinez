@@ -16,10 +16,16 @@
       "supportsTablet": false
     },
     "android": {
+      "package": "com.usuario.miappsemana02",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0d1117"
       }
-    }
+    },
+     "web": {
+      "bundler": "metro",
+      "output": "single"
+    },
+    "platforms": ["ios", "android", "web"]
   }
 }

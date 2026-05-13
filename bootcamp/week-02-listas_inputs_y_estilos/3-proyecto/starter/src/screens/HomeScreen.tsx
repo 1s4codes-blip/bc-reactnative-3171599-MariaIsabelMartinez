@@ -6,102 +6,100 @@ import {
   TextInput,
   StyleSheet,
   Platform,
-  Keyboard,
   KeyboardAvoidingView,
-  TouchableWithoutFeedback,
   ListRenderItem,
 } from 'react-native';
 import { Item } from '../types';
-import { ITEMS } from '../data/mockData';
+import { IMPORTS } from '../data/mockData';
 import { ItemCard } from '../components/ItemCard';
 import { COLORS, TYPOGRAPHY, SPACING } from '../theme';
 
 export function HomeScreen(): React.JSX.Element {
-  // ============================================
-  // ESTADO DE BÚSQUEDA
-  // TODO: Inicializa el estado del input de búsqueda
-  // Nombre de la variable: query | setter: setQuery
-  // Tipo: string | Valor inicial: ''
-  // ============================================
-  // TODO: const [query, setQuery] = ...
+  const [query, setQuery] = useState('');
 
-  // ============================================
-  // FILTRADO CON useMemo
-  // TODO: Implementar filtrado eficiente con useMemo
-  //
-  // Debe retornar todos los ITEMS si query está vacío,
-  // o solo los que incluyan el texto de query en el
-  // campo `name` (case-insensitive).
-  //
-  // Dependencia del useMemo: [query]
-  // ============================================
-  // TODO: const filteredItems = useMemo(() => { ... }, [query]);
+  const filteredItems = useMemo(() => {
+    if (query.trim() === '') return IMPORTS;
+    const lower = query.toLowerCase();
+    return IMPORTS.filter(
+      (item) =>
+        item.name.toLowerCase().includes(lower) ||
+        item.supplier.toLowerCase().includes(lower) ||
+        item.origin.toLowerCase().includes(lower),
+    );
+  }, [query]);
 
-  // ============================================
-  // EMPTY STATE
-  // TODO: Implementar renderEmpty con useCallback
-  //
-  // Debe mostrar:
-  //   - Un texto principal: 'Sin resultados para "{query}"'
-  //   - Un texto secundario orientando al usuario
-  //
-  // Dependencia del useCallback: [query]
-  // ============================================
-  // TODO: const renderEmpty = useCallback(() => ( ... ), [query]);
+  const renderEmpty = useCallback(
+    () => (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>No results for "{query}"</Text>
+        <Text style={styles.emptySubText}>
+          Try searching by product name, supplier or country of origin
+        </Text>
+      </View>
+    ),
+    [query],
+  );
 
-  // ============================================
-  // RENDER ITEM
-  // TODO: Implementar renderItem con useCallback
-  //
-  // Debe renderizar un <ItemCard> pasando el item
-  // y una función onPress (por ahora puede ser vacía)
-  //
-  // Sin dependencias externas → useCallback(() => ..., [])
-  // ============================================
-  // TODO: const renderItem: ListRenderItem<Item> = useCallback(({ item }) => ( ... ), []);
+  const renderSeparator = useCallback(
+    () => <View style={styles.separator} />,
+    [],
+  );
 
-  // ============================================
-  // RENDER PRINCIPAL
-  // TODO: Reemplaza este View placeholder con la UI completa:
-  //
-  // Estructura esperada:
-  //   <KeyboardAvoidingView behavior={...}>
-  //     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-  //       <View style={styles.inner}>
-  //         {/* Input de búsqueda */}
-  //         <View style={styles.searchContainer}>
-  //           <TextInput
-  //             style={styles.searchInput}
-  //             placeholder="Buscar..."
-  //             value={query}
-  //             onChangeText={setQuery}
-  //             keyboardType="default"
-  //             returnKeyType="search"
-  //             clearButtonMode="while-editing"
-  //           />
-  //         </View>
-  //         {/* Lista filtrada */}
-  //         <FlatList
-  //           data={filteredItems}
-  //           keyExtractor={(item) => item.id}
-  //           renderItem={renderItem}
-  //           ListEmptyComponent={renderEmpty}
-  //           ItemSeparatorComponent={...}
-  //           keyboardShouldPersistTaps="handled"
-  //         />
-  //       </View>
-  //     </TouchableWithoutFeedback>
-  //   </KeyboardAvoidingView>
-  // ============================================
+  const renderItem: ListRenderItem<Item> = useCallback(
+    ({ item }) => (
+      <ItemCard
+        item={item}
+        onPress={() => {}}
+      />
+    ),
+    [],
+  );
+
   return (
-    <View style={styles.placeholder}>
-      <Text style={styles.placeholderText}>
-        HomeScreen — Implementa los TODOs
-      </Text>
-      <Text style={styles.placeholderSub}>
-        {ITEMS.length} items en mockData.ts
-      </Text>
-    </View>
+    <KeyboardAvoidingView
+      style={styles.kvContainer}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+    >
+      <View style={styles.inner}>
+
+        {/* Screen header */}
+        <View style={styles.screenHeader}>
+          <Text style={styles.screenTitle}>Import Shipments</Text>
+          <Text style={styles.screenSubtitle}>
+            {filteredItems.length} of {IMPORTS.length} records
+          </Text>
+        </View>
+
+        {/* Search input */}
+        <View style={styles.searchContainer}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search by product, supplier or origin..."
+            placeholderTextColor={COLORS.textMuted}
+            value={query}
+            onChangeText={setQuery}
+            keyboardType="default"
+            returnKeyType="search"
+            autoCorrect={false}
+            autoCapitalize="none"
+            clearButtonMode="while-editing"
+          />
+        </View>
+
+        {/* Filtered list */}
+        <FlatList
+          data={filteredItems}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          ListEmptyComponent={renderEmpty}
+          ItemSeparatorComponent={renderSeparator}
+          contentContainerStyle={styles.listContent}
+          keyboardShouldPersistTaps="handled"
+        />
+
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -113,9 +111,24 @@ const styles = StyleSheet.create({
   inner: {
     flex: 1,
   },
+  screenHeader: {
+    paddingHorizontal: SPACING.base,
+    paddingTop: SPACING.lg,
+    paddingBottom: SPACING.md,
+  },
+  screenTitle: {
+    fontSize: TYPOGRAPHY.size.xl,
+    fontWeight: TYPOGRAPHY.weight.bold,
+    color: COLORS.textPrimary,
+  },
+  screenSubtitle: {
+    fontSize: TYPOGRAPHY.size.sm,
+    color: COLORS.textSecondary,
+    marginTop: 2,
+  },
   searchContainer: {
     paddingHorizontal: SPACING.base,
-    paddingVertical: SPACING.md,
+    paddingBottom: SPACING.md,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.borderLight,
   },
@@ -148,32 +161,12 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: TYPOGRAPHY.size.md,
-    fontWeight: '600',
+    fontWeight: TYPOGRAPHY.weight.semibold,
     color: COLORS.textPrimary,
     textAlign: 'center',
     marginBottom: SPACING.sm,
   },
   emptySubText: {
-    fontSize: TYPOGRAPHY.size.sm,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-  },
-  // Placeholder — eliminar cuando implementes la UI real
-  placeholder: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: COLORS.background,
-    padding: SPACING.xxl,
-  },
-  placeholderText: {
-    fontSize: TYPOGRAPHY.size.md,
-    fontWeight: '600',
-    color: COLORS.textPrimary,
-    textAlign: 'center',
-    marginBottom: SPACING.sm,
-  },
-  placeholderSub: {
     fontSize: TYPOGRAPHY.size.sm,
     color: COLORS.textSecondary,
     textAlign: 'center',
