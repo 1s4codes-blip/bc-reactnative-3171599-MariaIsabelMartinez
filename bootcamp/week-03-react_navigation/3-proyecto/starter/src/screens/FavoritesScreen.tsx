@@ -2,28 +2,59 @@
 // Segunda pestaña del Tab Navigator.
 // Muestra una lista de elementos favoritos del dominio.
 
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
 
 import { FAVORITES } from '../data/mockData';
 import { COLORS, RADIUS, SPACING, TYPOGRAPHY } from '../theme';
 import type { Item } from '../types';
 
+const STATUS_COLORS: Record<Item['status'], string> = {
+  pending: COLORS.warning,
+  in_transit: COLORS.info,
+  customs_review: '#a5d6ff',
+  cleared: COLORS.success,
+  delivered: COLORS.textSecondary,
+};
+ 
+const STATUS_LABELS: Record<Item['status'], string> = {
+  pending: 'Pending',
+  in_transit: 'In Transit',
+  customs_review: 'Customs Review',
+  cleared: 'Cleared',
+  delivered: 'Delivered',
+};
+
 export function FavoritesScreen(): React.JSX.Element {
-  /**
-   * Renderiza cada ítem favorito.
-   * TODO: adaptar el diseño a tu dominio (igual que HomeScreen.renderItem)
-   */
+
   function renderFavorite({ item }: { item: Item }): React.JSX.Element {
+    const statusColor = STATUS_COLORS[item.status];
     return (
       <View style={styles.card}>
-        {/* Ícono de favorito */}
-        <Text style={styles.heartIcon}>♥</Text>
+        <Text style={styles.starIcon}>★</Text>
+
         <View style={styles.cardContent}>
+         <View style={styles.cardHeader}>
+            <Text style={styles.shipmentId}>{item.id}</Text>
+            <View style={[styles.statusBadge, { borderColor: statusColor }]}>
+              <Text style={[styles.statusText, { color: statusColor }]}>
+                {STATUS_LABELS[item.status]}
+              </Text>
+            </View>
+          </View>
+
           <Text style={styles.itemName}>{item.name}</Text>
-          <Text style={styles.itemDescription} numberOfLines={2}>
-            {item.description}
+          <Text style={styles.route}>
+            {item.origin}
+            {'  →  '}
+            {item.destination}
           </Text>
-          {/* TODO: agregar campos de tu dominio igual que en HomeScreen */}
+ 
+          <View style={styles.cardFooter}>
+            <Text style={styles.supplier}>{item.supplierName}</Text>
+            <Text style={styles.value}>
+              {item.currency} {item.totalValue.toLocaleString()}
+            </Text>
+          </View>
         </View>
       </View>
     );
@@ -31,9 +62,7 @@ export function FavoritesScreen(): React.JSX.Element {
 
   return (
     <View style={styles.container}>
-      {/* TODO: cambiar el título según tu dominio */}
-      {/* Ejemplos: "Mis Libros Favoritos", "Medicamentos Guardados", etc. */}
-      <Text style={styles.title}>Favoritos</Text>
+      <Text style={styles.title}>Priority Shipments</Text>
       <FlatList
         data={FAVORITES}
         keyExtractor={(item) => item.id}
@@ -42,10 +71,7 @@ export function FavoritesScreen(): React.JSX.Element {
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>
-              {/* TODO: personalizar el mensaje vacío según tu dominio */}
-              No tienes favoritos todavía
-            </Text>
+            <Text style={styles.emptyText}>No priority shipments</Text>
           </View>
         }
       />
@@ -80,24 +106,58 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     gap: SPACING.md,
   },
-  heartIcon: {
+  starIcon: {
     fontSize: TYPOGRAPHY.size.lg,
     color: COLORS.error,
     marginTop: 2,
   },
   cardContent: {
     flex: 1,
+    gap: SPACING.xs,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  shipmentId: {
+    fontSize: TYPOGRAPHY.size.xs,
+    fontWeight: TYPOGRAPHY.weight.medium,
+    color: COLORS.textMuted,
+    letterSpacing: 0.5,
+  },
+  statusBadge: {
+    borderWidth: 1,
+    borderRadius: RADIUS.full,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 2,
+  },
+  statusText: {
+    fontSize: TYPOGRAPHY.size.xs,
+    fontWeight: TYPOGRAPHY.weight.medium,
   },
   itemName: {
     fontSize: TYPOGRAPHY.size.base,
     fontWeight: TYPOGRAPHY.weight.semibold,
     color: COLORS.textPrimary,
-    marginBottom: SPACING.xs,
   },
-  itemDescription: {
+  route: {
     fontSize: TYPOGRAPHY.size.sm,
     color: COLORS.textSecondary,
-    lineHeight: 18,
+  },
+  cardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: SPACING.xs,
+  },
+  supplier: {
+    fontSize: TYPOGRAPHY.size.sm,
+    color: COLORS.textMuted,
+  },
+  value: {
+    fontSize: TYPOGRAPHY.size.sm,
+    fontWeight: TYPOGRAPHY.weight.semibold,
+    color: COLORS.accent,
   },
   separator: {
     height: SPACING.sm,

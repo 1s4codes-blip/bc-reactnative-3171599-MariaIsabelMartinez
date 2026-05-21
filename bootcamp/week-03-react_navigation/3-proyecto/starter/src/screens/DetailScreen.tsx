@@ -1,73 +1,164 @@
 // src/screens/DetailScreen.tsx
-// Pantalla de detalle — recibe los datos del ítem seleccionado via params.
-// Los params llegan del Stack Navigator cuando se llama navigate('HomeDetail', {...}).
+// Pantalla de detalle — muestra todos los datos del shipment seleccionado.
+// Los params llegan del Stack Navigator desde HomeScreen.
 
-import type { NativeStackRouteProp } from '@react-navigation/native-stack';
+// src/screens/DetailScreen.tsx
 import { useRoute } from '@react-navigation/native';
+import type { RouteProp } from '@react-navigation/native';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { COLORS, RADIUS, SPACING, TYPOGRAPHY } from '../theme';
 import type { HomeStackParamList } from '../navigation/types';
 
 // Tipo del route hook para leer los params tipados de esta pantalla
-type DetailScreenRouteProp = NativeStackRouteProp<HomeStackParamList, 'HomeDetail'>;
+type DetailScreenRouteProp = RouteProp<HomeStackParamList, 'HomeDetail'>;
+
+// Mapa de colores por estado del shipment
+const STATUS_COLORS: Record<string, string> = {
+  pending: COLORS.warning,
+  in_transit: COLORS.info,
+  customs_review: '#a5d6ff',
+  cleared: COLORS.success,
+  delivered: COLORS.textSecondary,
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  pending: 'Pending',
+  in_transit: 'In Transit',
+  customs_review: 'Customs Review',
+  cleared: 'Cleared',
+  delivered: 'Delivered',
+};
+
+const CUSTOMS_LABELS: Record<string, string> = {
+  not_submitted: 'Not Submitted',
+  under_review: 'Under Review',
+  approved: 'Approved',
+  rejected: 'Rejected',
+};
+
+const CUSTOMS_COLORS: Record<string, string> = {
+  not_submitted: COLORS.textMuted,
+  under_review: COLORS.warning,
+  approved: COLORS.success,
+  rejected: COLORS.error,
+};
 
 export function DetailScreen(): React.JSX.Element {
-  // useRoute devuelve los params pasados desde HomeScreen
+  // useRoute devuelve los params tipados pasados desde HomeScreen
   const route = useRoute<DetailScreenRouteProp>();
-  const { id, name } = route.params;
-  // TODO: desestructurar campos adicionales de tu dominio
-  // Ejemplo (Biblioteca):   const { id, name, author, isbn, pages } = route.params;
-  // Ejemplo (Farmacia):     const { id, name, price, dosage } = route.params;
-  // Ejemplo (Cine):         const { id, name, director, year, genre } = route.params;
+  const {
+    id,
+    name,
+    origin,
+    destination,
+    status,
+    estimatedArrival,
+    totalValue,
+    currency,
+    trackingNumber,
+    weightKg,
+    supplierName,
+    supplierCountry,
+    customsStatus,
+    customsDeclarationNumber,
+    estimatedDuty,
+  } = route.params;
+
+  const statusColor = STATUS_COLORS[status] ?? COLORS.textMuted;
+  const customsColor = CUSTOMS_COLORS[customsStatus] ?? COLORS.textMuted;
 
   return (
     <ScrollView
       style={styles.container}
       contentContainerStyle={styles.content}
     >
-      {/* Título del elemento */}
+      {/* Nombre del shipment */}
       <Text style={styles.name}>{name}</Text>
 
-      {/* Badge con el ID */}
-      <View style={styles.badge}>
-        <Text style={styles.badgeText}>ID: {id}</Text>
+      {/* Badges — ID y estado */}
+      <View style={styles.badgeRow}>
+        <View style={styles.badge}>
+          <Text style={styles.badgeText}>{id}</Text>
+        </View>
+        <View style={[styles.statusBadge, { borderColor: statusColor }]}>
+          <Text style={[styles.statusText, { color: statusColor }]}>
+            {STATUS_LABELS[status] ?? status}
+          </Text>
+        </View>
       </View>
 
-      {/* TODO: mostrar los detalles específicos de tu dominio */}
-      {/* Cada sección de detalle sigue el mismo patrón: */}
+      {/* ---- SECCIÓN: Shipment Info ---- */}
+      <Text style={styles.sectionTitle}>Shipment Info</Text>
 
-      {/* PATRÓN DE CAMPO DE DETALLE: */}
-      {/* <View style={styles.field}>
-        <Text style={styles.fieldLabel}>Autor</Text>
-        <Text style={styles.fieldValue}>{author}</Text>
-      </View> */}
-
-      {/* Agrega tantos campos como necesite tu dominio */}
-      {/* Ejemplo Biblioteca:  */}
-      {/* <View style={styles.field}>
-        <Text style={styles.fieldLabel}>ISBN</Text>
-        <Text style={styles.fieldValue}>{isbn}</Text>
-      </View>
       <View style={styles.field}>
-        <Text style={styles.fieldLabel}>Páginas</Text>
-        <Text style={styles.fieldValue}>{pages}</Text>
-      </View> */}
-
-      {/* Ejemplo Farmacia: */}
-      {/* <View style={styles.field}>
-        <Text style={styles.fieldLabel}>Precio</Text>
-        <Text style={styles.fieldValue}>${price}</Text>
+        <Text style={styles.fieldLabel}>Tracking Number</Text>
+        <Text style={styles.fieldValue}>{trackingNumber}</Text>
       </View>
-      <View style={styles.field}>
-        <Text style={styles.fieldLabel}>Dosificación</Text>
-        <Text style={styles.fieldValue}>{dosage}</Text>
-      </View> */}
 
-      {/* Placeholder — eliminar cuando implementes tu dominio */}
-      <View style={styles.placeholder}>
-        <Text style={styles.placeholderText}>
-          Agrega aquí los campos de detalle de tu dominio
+      <View style={styles.field}>
+        <Text style={styles.fieldLabel}>Origin</Text>
+        <Text style={styles.fieldValue}>{origin}</Text>
+      </View>
+
+      <View style={styles.field}>
+        <Text style={styles.fieldLabel}>Destination</Text>
+        <Text style={styles.fieldValue}>{destination}</Text>
+      </View>
+
+      <View style={styles.field}>
+        <Text style={styles.fieldLabel}>Estimated Arrival</Text>
+        <Text style={styles.fieldValue}>{estimatedArrival}</Text>
+      </View>
+
+      <View style={styles.field}>
+        <Text style={styles.fieldLabel}>Total Value</Text>
+        <Text style={[styles.fieldValue, styles.highlight]}>
+          {currency} {totalValue.toLocaleString()}
+        </Text>
+      </View>
+
+      <View style={styles.field}>
+        <Text style={styles.fieldLabel}>Weight</Text>
+        <Text style={styles.fieldValue}>{weightKg.toLocaleString()} kg</Text>
+      </View>
+
+      {/* ---- SECCIÓN: Supplier ---- */}
+      <Text style={styles.sectionTitle}>Supplier</Text>
+
+      <View style={styles.field}>
+        <Text style={styles.fieldLabel}>Company</Text>
+        <Text style={styles.fieldValue}>{supplierName}</Text>
+      </View>
+
+      <View style={styles.field}>
+        <Text style={styles.fieldLabel}>Country</Text>
+        <Text style={styles.fieldValue}>{supplierCountry}</Text>
+      </View>
+
+      {/* ---- SECCIÓN: Customs ---- */}
+      <Text style={styles.sectionTitle}>Customs</Text>
+
+      <View style={styles.field}>
+        <Text style={styles.fieldLabel}>Declaration Status</Text>
+        <Text style={[styles.fieldValue, { color: customsColor }]}>
+          {CUSTOMS_LABELS[customsStatus] ?? customsStatus}
+        </Text>
+      </View>
+
+      {customsDeclarationNumber.length > 0 && (
+        <View style={styles.field}>
+          <Text style={styles.fieldLabel}>Declaration Number</Text>
+          <Text style={styles.fieldValue}>{customsDeclarationNumber}</Text>
+        </View>
+      )}
+
+      <View style={styles.field}>
+        <Text style={styles.fieldLabel}>Estimated Duty</Text>
+        <Text style={styles.fieldValue}>
+          {estimatedDuty === 0
+            ? 'Duty-exempt'
+            : `${currency} ${estimatedDuty.toLocaleString()}`}
         </Text>
       </View>
     </ScrollView>
@@ -81,7 +172,8 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: SPACING.base,
-    gap: SPACING.md,
+    gap: SPACING.sm,
+    paddingBottom: SPACING.xxl,
   },
   name: {
     fontSize: TYPOGRAPHY.size.xl,
@@ -89,18 +181,42 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     marginBottom: SPACING.xs,
   },
+  badgeRow: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+    marginBottom: SPACING.md,
+  },
   badge: {
     alignSelf: 'flex-start',
     backgroundColor: COLORS.accentDim,
     borderRadius: RADIUS.full,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.xs,
-    marginBottom: SPACING.md,
   },
   badgeText: {
     fontSize: TYPOGRAPHY.size.xs,
     fontWeight: TYPOGRAPHY.weight.medium,
     color: COLORS.accent,
+  },
+  statusBadge: {
+    alignSelf: 'flex-start',
+    borderWidth: 1,
+    borderRadius: RADIUS.full,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
+  },
+  statusText: {
+    fontSize: TYPOGRAPHY.size.xs,
+    fontWeight: TYPOGRAPHY.weight.medium,
+  },
+  sectionTitle: {
+    fontSize: TYPOGRAPHY.size.sm,
+    fontWeight: TYPOGRAPHY.weight.bold,
+    color: COLORS.accent,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginTop: SPACING.md,
+    marginBottom: SPACING.xs,
   },
   field: {
     backgroundColor: COLORS.surface,
@@ -121,18 +237,8 @@ const styles = StyleSheet.create({
     fontSize: TYPOGRAPHY.size.base,
     color: COLORS.textPrimary,
   },
-  placeholder: {
-    backgroundColor: COLORS.surfaceAlt,
-    borderRadius: RADIUS.md,
-    padding: SPACING.xl,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderStyle: 'dashed',
-  },
-  placeholderText: {
-    fontSize: TYPOGRAPHY.size.sm,
-    color: COLORS.textMuted,
-    textAlign: 'center',
+  highlight: {
+    color: COLORS.accent,
+    fontWeight: TYPOGRAPHY.weight.semibold,
   },
 });

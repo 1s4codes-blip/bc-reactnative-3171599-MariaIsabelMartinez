@@ -1,81 +1,165 @@
 // src/data/mockData.ts
 // Datos de prueba genéricos para la app.
-// TODO: reemplazar con datos de tu dominio asignado.
 
 import type { Item } from '../types';
 
 // ============================================
 // LISTA PRINCIPAL DE ELEMENTOS
 // ============================================
-// Estos son datos genéricos de placeholder.
-// Debes reemplazarlos con datos coherentes a tu dominio.
-//
-// Ejemplos:
-//   Biblioteca  → libros con autor, ISBN, páginas
-//   Farmacia    → medicamentos con precio, stock, dosis
-//   Gimnasio    → rutinas con duración, grupos musculares
-//   Restaurante → platillos con precio, ingredientes
-//   Cine        → películas con director, año, género
 
 export const ITEMS: Item[] = [
   {
-    id: '1',
-    name: 'Elemento 01',
-    description: 'Descripción del primer elemento de tu dominio.',
-    // TODO: agregar campos específicos de tu dominio
+    id: 'SHP-001',
+    name: 'Electronics Batch Q2-2025',
+    description: 'Consumer electronics from Shenzhen supplier — 450 units.',
+    origin: 'Shenzhen, China',
+    destination: 'Bogotá, Colombia',
+    status: 'in_transit',
+    estimatedArrival: '2025-06-14',
+    totalValue: 87500,
+    currency: 'USD',
+    trackingNumber: 'CN-7823-XZ91',
+    weightKg: 620,
+    supplierName: 'ShenTech Manufacturing',
+    supplierCountry: 'China',
+    customsStatus: 'under_review',
+    customsDeclarationNumber: 'COL-2025-44821',
+    estimatedDuty: 6125,
   },
   {
-    id: '2',
-    name: 'Elemento 02',
-    description: 'Descripción del segundo elemento de tu dominio.',
-    // TODO: agregar campos específicos de tu dominio
+    id: 'SHP-002',
+    name: 'Textile Collection FW-2025',
+    description: 'Fall/winter fabric rolls and finished garments from Turkey.',
+    origin: 'Istanbul, Turkey',
+    destination: 'Medellín, Colombia',
+    status: 'customs_review',
+    estimatedArrival: '2025-06-02',
+    totalValue: 34200,
+    currency: 'EUR',
+    trackingNumber: 'TR-4401-KM77',
+    weightKg: 1850,
+    supplierName: 'AnatoluTex S.A.',
+    supplierCountry: 'Turkey',
+    customsStatus: 'under_review',
+    customsDeclarationNumber: 'COL-2025-43190',
+    estimatedDuty: 2394,
   },
   {
-    id: '3',
-    name: 'Elemento 03',
-    description: 'Descripción del tercer elemento de tu dominio.',
-    // TODO: agregar campos específicos de tu dominio
+    id: 'SHP-003',
+    name: 'Industrial Machinery — Press Line',
+    description: 'CNC press machines and hydraulic tools from Germany.',
+    origin: 'Hamburg, Germany',
+    destination: 'Bogotá, Colombia',
+    status: 'cleared',
+    estimatedArrival: '2025-05-25',
+    totalValue: 215000,
+    currency: 'EUR',
+    trackingNumber: 'DE-9900-PL33',
+    weightKg: 12400,
+    supplierName: 'PräzisionsMasch GmbH',
+    supplierCountry: 'Germany',
+    customsStatus: 'approved',
+    customsDeclarationNumber: 'COL-2025-41002',
+    estimatedDuty: 18490,
   },
   {
-    id: '4',
-    name: 'Elemento 04',
-    description: 'Descripción del cuarto elemento de tu dominio.',
-    // TODO: agregar campos específicos de tu dominio
+    id: 'SHP-004',
+    name: 'Food Ingredients Lot B-12',
+    description: 'Dried spices, cocoa powder and specialty flours from Spain.',
+    origin: 'Valencia, Spain',
+    destination: 'Cali, Colombia',
+    status: 'pending',
+    estimatedArrival: '2025-07-05',
+    totalValue: 12800,
+    currency: 'EUR',
+    trackingNumber: 'ES-2211-FD08',
+    weightKg: 3200,
+    supplierName: 'Sabores Ibéricos SL',
+    supplierCountry: 'Spain',
+    customsStatus: 'not_submitted',
+    customsDeclarationNumber: '',
+    estimatedDuty: 896,
   },
   {
-    id: '5',
-    name: 'Elemento 05',
-    description: 'Descripción del quinto elemento de tu dominio.',
-    // TODO: agregar campos específicos de tu dominio
+    id: 'SHP-005',
+    name: 'Chemical Supplies — Lab Grade',
+    description: 'Industrial-grade solvents and reagents from the United States.',
+    origin: 'Houston, USA',
+    destination: 'Bogotá, Colombia',
+    status: 'delivered',
+    estimatedArrival: '2025-05-10',
+    totalValue: 9400,
+    currency: 'USD',
+    trackingNumber: 'US-5581-CH22',
+    weightKg: 740,
+    supplierName: 'NexChem Industries',
+    supplierCountry: 'USA',
+    customsStatus: 'approved',
+    customsDeclarationNumber: 'COL-2025-38801',
+    estimatedDuty: 658,
   },
   {
-    id: '6',
-    name: 'Elemento 06',
-    description: 'Descripción del sexto elemento de tu dominio.',
-    // TODO: agregar campos específicos de tu dominio
+    id: 'SHP-006',
+    name: 'Smart Home Devices Q3 Pre-order',
+    description: 'Smart speakers, cameras and sensors — pre-order batch.',
+    origin: 'Taipei, Taiwan',
+    destination: 'Bogotá, Colombia',
+    status: 'pending',
+    estimatedArrival: '2025-08-20',
+    totalValue: 53000,
+    currency: 'USD',
+    trackingNumber: 'TW-7730-SH55',
+    weightKg: 390,
+    supplierName: 'TaiwanSmart Corp.',
+    supplierCountry: 'Taiwan',
+    customsStatus: 'not_submitted',
+    customsDeclarationNumber: '',
+    estimatedDuty: 3710,
   },
   {
-    id: '7',
-    name: 'Elemento 07',
-    description: 'Descripción del séptimo elemento de tu dominio.',
-    // TODO: agregar campos específicos de tu dominio
+    id: 'SHP-007',
+    name: 'Medical Equipment — Clinic Bundle',
+    description: 'Diagnostic and monitoring devices for private clinics.',
+    origin: 'Seoul, South Korea',
+    destination: 'Bogotá, Colombia',
+    status: 'in_transit',
+    estimatedArrival: '2025-06-28',
+    totalValue: 128000,
+    currency: 'USD',
+    trackingNumber: 'KR-3301-ME99',
+    weightKg: 860,
+    supplierName: 'KoraMed Exports Ltd.',
+    supplierCountry: 'South Korea',
+    customsStatus: 'under_review',
+    customsDeclarationNumber: 'COL-2025-47003',
+    estimatedDuty: 0,
   },
   {
-    id: '8',
-    name: 'Elemento 08',
-    description: 'Descripción del octavo elemento de tu dominio.',
-    // TODO: agregar campos específicos de tu dominio
+    id: 'SHP-008',
+    name: 'Office Furniture Collection',
+    description: 'Ergonomic chairs, standing desks and modular shelving.',
+    origin: 'Warsaw, Poland',
+    destination: 'Bogotá, Colombia',
+    status: 'customs_review',
+    estimatedArrival: '2025-06-18',
+    totalValue: 22600,
+    currency: 'EUR',
+    trackingNumber: 'PL-8802-OF14',
+    weightKg: 5100,
+    supplierName: 'ErgoPol Furniture',
+    supplierCountry: 'Poland',
+    customsStatus: 'under_review',
+    customsDeclarationNumber: 'COL-2025-46190',
+    estimatedDuty: 1582,
   },
 ];
 
 // ============================================
 // LISTA DE FAVORITOS
 // ============================================
-// Subconjunto de elementos para la pestaña Favorites.
-// TODO: seleccionar elementos coherentes con tu dominio.
 
 export const FAVORITES: Item[] = [
-  ITEMS[0],
   ITEMS[2],
-  ITEMS[4],
+  ITEMS[6],
+  ITEMS[0],
 ];

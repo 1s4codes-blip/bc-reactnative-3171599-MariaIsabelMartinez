@@ -1,47 +1,45 @@
 // src/types/index.ts
 // Define los tipos de datos del dominio.
-// Adapta la interfaz Item a tu dominio asignado.
 
 // ============================================
-// INTERFACE PRINCIPAL DEL DOMINIO
+// TIPOS DE APOYO
 // ============================================
 
+export type ShipmentStatus =
+  | 'pending'
+  | 'in_transit'
+  | 'customs_review'
+  | 'cleared'
+  | 'delivered';
+ 
+export type CustomsStatus =
+  | 'not_submitted'
+  | 'under_review'
+  | 'approved'
+  | 'rejected';
 export interface Item {
   id: string;
-  // Nombre del elemento (libro, medicamento, película, rutina, etc.)
   name: string;
-  // Descripción general del elemento
   description: string;
-
-  // TODO: agregar propiedades específicas de tu dominio
-  // Ejemplos según dominio:
-
-  // Biblioteca:
-  // author: string;
-  // isbn: string;
-  // pages: number;
-  // genre: string;
-
-  // Farmacia:
-  // price: number;
-  // stock: number;
-  // dosage: string;
-  // requiresPrescription: boolean;
-
-  // Gimnasio:
-  // duration: number;   // en minutos
-  // difficulty: 'basic' | 'intermediate' | 'advanced';
-  // muscleGroups: string[];
-
-  // Restaurante:
-  // price: number;
-  // ingredients: string[];
-  // isVegetarian: boolean;
-  // category: string;
-
-  // Cine:
-  // director: string;
-  // year: number;
-  // genre: string;
-  // duration: number;
+ 
+  // Logística
+  origin: string;
+  destination: string;
+  status: ShipmentStatus;
+  estimatedArrival: string;
+  trackingNumber: string;
+  weightKg: number;
+ 
+  // Valor comercial
+  totalValue: number;
+  currency: 'USD' | 'EUR' | 'CNY';
+ 
+  // Proveedor
+  supplierName: string;
+  supplierCountry: string;
+ 
+  // Aduana
+  customsStatus: CustomsStatus;
+  customsDeclarationNumber: string;
+  estimatedDuty: number;
 }

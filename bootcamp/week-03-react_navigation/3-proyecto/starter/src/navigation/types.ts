@@ -1,15 +1,13 @@
 // src/navigation/types.ts
-// Define los tipos de parámetros para cada navigator.
-// Esto habilita autocompletado y verificación en tiempo de compilación.
+
+import type { ShipmentStatus, CustomsStatus } from '../types';
 
 // ============================================
 // TAB NAVIGATOR — pantallas de nivel raíz
 // ============================================
 
 export type RootTabParamList = {
-  // Pestaña principal con Stack interno (lista → detalle)
   Home: undefined;
-  // Pestaña secundaria de favoritos
   Favorites: undefined;
 };
 
@@ -18,15 +16,22 @@ export type RootTabParamList = {
 // ============================================
 
 export type HomeStackParamList = {
-  // Pantalla de lista (sin params)
   HomeList: undefined;
-  // Pantalla de detalle — recibe id y name como mínimo
-  // TODO: agregar campos específicos de tu dominio
-  // Ejemplo (Biblioteca):   author: string; isbn: string;
-  // Ejemplo (Farmacia):     price: number; stock: number;
-  // Ejemplo (Cine):         director: string; year: number;
   HomeDetail: {
     id: string;
     name: string;
+    origin: string;
+    destination: string;
+    status: ShipmentStatus;
+    estimatedArrival: string;
+    totalValue: number;
+    currency: 'USD' | 'EUR' | 'CNY';
+    trackingNumber: string;
+    weightKg: number;
+    supplierName: string;
+    supplierCountry: string;
+    customsStatus: CustomsStatus;
+    customsDeclarationNumber: string;
+    estimatedDuty: number;
   };
 };
