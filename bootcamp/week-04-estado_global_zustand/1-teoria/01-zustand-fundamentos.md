@@ -15,23 +15,23 @@ En React Native, el estado puede vivir en tres lugares:
 | Nivel | Herramienta | Cuándo usar |
 |---|---|---|
 | Local (1 componente) | `useState` | Formularios, UI temporal |
-| Global (toda la app) | Zustand | Carrito, sesión de usuario, favoritos |
+| Global (toda la app) | Zustand | Envíos, sesión de usuario, productos importados |
 | Servidor | TanStack Query (semana 05) | Datos de una API |
 
 **Zustand** es una librería de estado global minimalista. No necesita `Provider`, no usa *reducers* ni *actions* al estilo Redux, y funciona con un simple hook.
 
 ```tsx
 // Con useState: el estado no se puede compartir entre pantallas
-function HomeScreen() {
-  const [cart, setCart] = useState<Item[]>([]);  // solo visible aquí
+function ProductScreen() {
+  const [shipments, setShipments] = useState<Shipment[]>([]);  // solo visible aquí
 }
 
 // Con Zustand: cualquier componente accede al mismo estado
-function HomeScreen() {
-  const cart = useCartStore(state => state.items);  // compartido
+function ProductScreen() {
+  const shipments = useShipmentStore(state => state.shipments);  // compartido
 }
-function CartScreen() {
-  const cart = useCartStore(state => state.items);  // mismo estado
+function ShipmentsScreen() {
+  const shipments = useShipmentStore(state => state.shipments);  // mismo estado
 }
 ```
 
@@ -43,7 +43,7 @@ function CartScreen() {
 import { create } from 'zustand';
 
 // 1. Definir la interface del store (estado + acciones)
-interface CounterStore {
+interface SupplierStore {
   count: number;
   increment: () => void;
   decrement: () => void;
@@ -52,7 +52,7 @@ interface CounterStore {
 
 // 2. Crear el store con create<T>()
 // La función recibe `set` para actualizar el estado
-export const useCounterStore = create<CounterStore>((set) => ({
+export const useSupplierStore = create<SupplierStore>((set) => ({
   // Estado inicial
   count: 0,
 
@@ -71,16 +71,16 @@ export const useCounterStore = create<CounterStore>((set) => ({
 ## 3. Consumir el store con selectores
 
 ```tsx
-import { useCounterStore } from '../stores/counterStore';
+import { useSupplierStore } from '../stores/supplierStore';
 
-export function CounterScreen(): React.JSX.Element {
+export function SupplierScreen(): React.JSX.Element {
   // Selector: función que extrae la parte del store que necesita el componente
   // Este componente solo se re-renderiza cuando `count` cambia
-  const count = useCounterStore((state) => state.count);
+  const count = useSupplierStore((state) => state.count);
 
   // Leer acciones también usa selector
-  const increment = useCounterStore((state) => state.increment);
-  const reset = useCounterStore((state) => state.reset);
+  const increment = useSupplierStore((state) => state.increment);
+  const reset = useSupplierStore((state) => state.reset);
 
   return (
     <View>
@@ -100,11 +100,11 @@ export function CounterScreen(): React.JSX.Element {
 
 ```tsx
 // ❌ MAL — el componente re-renderiza cuando CUALQUIER campo del store cambia
-const store = useCartStore();
+const store = useShipmentStore();
 
-// ✅ BIEN — solo re-renderiza cuando `items` cambia
-const items = useCartStore((state) => state.items);
-const total = useCartStore((state) => state.total);
+// ✅ BIEN — solo re-renderiza cuando `shipments` cambia
+const shipments = useShipmentStore((state) => state.shipments);
+const totalCount = useShipmentStore((state) => state.shipments.length);
 ```
 
 ---
@@ -114,41 +114,36 @@ const total = useCartStore((state) => state.total);
 ```tsx
 import { create } from 'zustand';
 
-interface Todo {
+interface ShipmentItem {
   id: string;
-  text: string;
-  completed: boolean;
+  name: string;
+  quantity: number;
 }
 
-interface TodoStore {
-  todos: Todo[];
-  addTodo: (text: string) => void;
-  toggleTodo: (id: string) => void;
-  removeTodo: (id: string) => void;
+interface ShipmentItemStore {
+  items: ShipmentItem[];
+  addItem: (name: string, quantity: number) => void;
+  removeItem: (id: string) => void;
+  clearAll: () => void;
 }
 
-export const useTodoStore = create<TodoStore>((set) => ({
-  todos: [],
+export const useShipmentItemStore = create<ShipmentItemStore>((set) => ({
+  items: [],
 
-  addTodo: (text) =>
+  addItem: (name, quantity) =>
     set((state) => ({
-      todos: [
-        ...state.todos,
-        { id: Date.now().toString(), text, completed: false },
+      items: [
+        ...state.items,
+        { id: Date.now().toString(), name, quantity },
       ],
     })),
 
-  toggleTodo: (id) =>
+  removeItem: (id) =>
     set((state) => ({
-      todos: state.todos.map((todo) =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
-      ),
+      items: state.items.filter((item) => item.id !== id),
     })),
 
-  removeTodo: (id) =>
-    set((state) => ({
-      todos: state.todos.filter((todo) => todo.id !== id),
-    })),
+  clearAll: () => set({ items: [] }),
 }));
 ```
 
@@ -157,24 +152,23 @@ export const useTodoStore = create<TodoStore>((set) => ({
 ## 5. Usar `get` para leer el store dentro de acciones
 
 ```tsx
-interface CartStore {
-  items: CartItem[];
-  total: number;
-  addItem: (item: CartItem) => void;
+import type { Shipment } from '../types';
+
+interface ShipmentStore {
+  shipments: Shipment[];
+  addShipment: (shipment: Shipment) => void;
 }
 
 // `get` permite leer el estado actual dentro de una acción
-export const useCartStore = create<CartStore>((set, get) => ({
-  items: [],
-  total: 0,
+export const useShipmentStore = create<ShipmentStore>((set, get) => ({
+  shipments: [],
 
-  addItem: (item) => {
-    const { items } = get();  // leer estado actual
-    const exists = items.find((i) => i.id === item.id);
+  addShipment: (shipment) => {
+    const { shipments } = get();  // leer estado actual
+    const exists = shipments.find((s) => s.productId === shipment.productId);
     if (exists) return;  // no duplicar
     set((state) => ({
-      items: [...state.items, item],
-      total: state.total + item.price,
+      shipments: [...state.shipments, shipment],
     }));
   },
 }));
@@ -190,13 +184,13 @@ En desarrollo, puedes conectar el store a Redux DevTools Browser Extension:
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
-export const useCartStore = create<CartStore>()(
+export const useShipmentStore = create<ShipmentStore>()(
   devtools(
     (set, get) => ({
-      items: [],
-      addItem: (item) => set((state) => ({ items: [...state.items, item] }), false, 'addItem'),
+      shipments: [],
+      addShipment: (s) => set((state) => ({ shipments: [...state.shipments, s] }), false, 'addShipment'),
     }),
-    { name: 'CartStore' }  // nombre visible en DevTools
+    { name: 'ShipmentStore' }  // nombre visible en DevTools
   )
 );
 ```
@@ -207,7 +201,7 @@ export const useCartStore = create<CartStore>()(
 
 ## ✅ Checklist de Verificación
 
-- [ ] El store exporta un hook que empieza con `use` (`useCartStore`)
+- [ ] El store exporta un hook que empieza con `use` (`useShipmentStore`)
 - [ ] Todas las acciones usan `set` (nunca mutan directamente el estado)
 - [ ] Cada componente lee solo la parte del store que necesita (selector)
 - [ ] La interface TypeScript define todos los campos y acciones

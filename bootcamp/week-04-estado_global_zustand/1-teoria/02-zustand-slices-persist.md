@@ -1,174 +1,253 @@
-# Zustand — Slices, Múltiples Stores y Persist
+# Zustand — Patrón Slices y Middleware Persist
 
 ## 🎯 Objetivos
 
-- Aplicar el patrón de slices para organizar stores grandes
-- Separar el estado en múltiples stores independientes
-- Persistir estado entre sesiones con el middleware `persist`
+- Escalar stores complejos usando el patrón slices
+- Combinar múltiples stores en la misma app
+- Persistir estado entre sesiones con el middleware `persist` y AsyncStorage
 
 ---
 
-## 1. Cuándo dividir el estado
+## 1. Patrón Slices
 
-Un store con demasiados campos se vuelve difícil de mantener:
+Cuando el store crece, conviene dividirlo en **slices** (porciones) que se combinan al final. Cada slice define su propio estado y acciones, y luego se unifican en un solo `create`.
+
+### Ejemplo: Store de Importación con slices
 
 ```tsx
-// ❌ MAL — un store monolítico con todo
-interface AppStore {
-  // auth
-  user: User | null;
-  token: string | null;
-  login: () => void;
-  logout: () => void;
-  // cart
-  cartItems: CartItem[];
-  addToCart: () => void;
-  // filters
-  searchQuery: string;
-  setSearch: () => void;
+import { create } from 'zustand';
+import type { Product, Supplier, Shipment } from '../types';
+
+// ─────────────────────────────────────────────────────────
+// Slice 1: Productos
+// ─────────────────────────────────────────────────────────
+interface ProductSlice {
+  products: Product[];
+  setProducts: (products: Product[]) => void;
 }
+
+const createProductSlice = (set: any): ProductSlice => ({
+  products: [],
+  setProducts: (products) => set({ products }),
+});
+
+// ─────────────────────────────────────────────────────────
+// Slice 2: Proveedores
+// ─────────────────────────────────────────────────────────
+interface SupplierSlice {
+  suppliers: Supplier[];
+  selectedSupplier: Supplier | null;
+  selectSupplier: (supplier: Supplier | null) => void;
+}
+
+const createSupplierSlice = (set: any): SupplierSlice => ({
+  suppliers: [],
+  selectedSupplier: null,
+  selectSupplier: (supplier) => set({ selectedSupplier: supplier }),
+});
+
+// ─────────────────────────────────────────────────────────
+// Slice 3: Envíos
+// ─────────────────────────────────────────────────────────
+interface ShipmentSlice {
+  shipments: Shipment[];
+  addShipment: (shipment: Shipment) => void;
+  removeShipment: (id: string) => void;
+}
+
+const createShipmentSlice = (set: any): ShipmentSlice => ({
+  shipments: [],
+  addShipment: (shipment) =>
+    set((state: any) => ({ shipments: [...state.shipments, shipment] })),
+  removeShipment: (id) =>
+    set((state: any) => ({ shipments: state.shipments.filter((s: Shipment) => s.id !== id) })),
+});
+
+// ─────────────────────────────────────────────────────────
+// Store combinado
+// ─────────────────────────────────────────────────────────
+export type AppStore = ProductSlice & SupplierSlice & ShipmentSlice;
+
+export const useAppStore = create<AppStore>()((set) => ({
+  ...createProductSlice(set),
+  ...createSupplierSlice(set),
+  ...createShipmentSlice(set),
+}));
 ```
 
-La solución: **múltiples stores** o **slices** dentro de un store:
+### Uso en componentes
+
+```tsx
+function ProductList(): React.JSX.Element {
+  // Cada componente selecciona solo la parte que necesita
+  const products = useAppStore((state) => state.products);
+  const addShipment = useAppStore((state) => state.addShipment);
+
+  // ...
+}
+```
 
 ---
 
 ## 2. Múltiples stores independientes
 
-La opción más simple es crear un store por dominio:
+No todo necesita estar en un solo store. Puedes tener stores separados:
 
 ```tsx
-// stores/authStore.ts
-export const useAuthStore = create<AuthStore>()((set) => ({
-  user: null,
-  token: null,
-  login: (user, token) => set({ user, token }),
-  logout: () => set({ user: null, token: null }),
+// stores/productStore.ts
+export const useProductStore = create<ProductStore>((set) => ({
+  // estado y acciones de productos
 }));
 
-// stores/cartStore.ts
-export const useCartStore = create<CartStore>()((set) => ({
-  items: [],
-  addItem: (item) => set((state) => ({ items: [...state.items, item] })),
-  removeItem: (id) =>
-    set((state) => ({ items: state.items.filter((i) => i.id !== id) })),
-  clearCart: () => set({ items: [] }),
+// stores/shipmentStore.ts
+export const useShipmentStore = create<ShipmentStore>((set) => ({
+  // estado y acciones de envíos (independiente)
 }));
 
-// En un componente, puedes usar ambos stores
-function CheckoutScreen() {
-  const user = useAuthStore((state) => state.user);
-  const items = useCartStore((state) => state.items);
-}
+// stores/customsStore.ts
+export const useCustomsStore = create<CustomsStore>((set) => ({
+  // estado y acciones de trámites aduaneros (independiente)
+}));
 ```
 
 ---
 
-## 3. Patrón de slices (store único compuesto)
+## 3. Middleware `persist` con AsyncStorage
 
-Los slices son funciones que crean una porción del store, combinadas en un store principal:
-
-```tsx
-import { create, StateCreator } from 'zustand';
-
-// Slice 1: autenticación
-interface AuthSlice {
-  user: string | null;
-  setUser: (name: string) => void;
-}
-
-const createAuthSlice: StateCreator<AuthSlice & CartSlice, [], [], AuthSlice> =
-  (set) => ({
-    user: null,
-    setUser: (name) => set({ user: name }),
-  });
-
-// Slice 2: carrito
-interface CartSlice {
-  count: number;
-  increment: () => void;
-}
-
-const createCartSlice: StateCreator<AuthSlice & CartSlice, [], [], CartSlice> =
-  (set) => ({
-    count: 0,
-    increment: () => set((state) => ({ count: state.count + 1 })),
-  });
-
-// Combinar en un store principal
-type RootStore = AuthSlice & CartSlice;
-export const useRootStore = create<RootStore>()((...args) => ({
-  ...createAuthSlice(...args),
-  ...createCartSlice(...args),
-}));
-```
-
-> 💡 **¿Cuándo usar slices vs stores separados?** Los slices son útiles cuando las partes del estado necesitan accederse entre sí (ej. la acción del carrito necesita el user). Para dominios totalmente independientes, prefiere stores separados.
-
----
-
-## 4. Middleware `persist` con AsyncStorage
-
-El middleware `persist` guarda automáticamente el store en almacenamiento local y lo restaura al reinicar la app:
+El middleware `persist` guarda el store en AsyncStorage para que sobreviva al reinicio de la app.
 
 ```tsx
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
-interface FavoritesStore {
-  ids: string[];
-  addFavorite: (id: string) => void;
-  removeFavorite: (id: string) => void;
+interface CustomsStore {
+  records: CustomsRecord[];
+  isLoading: boolean;
+  addRecord: (productName: string) => void;
+  removeRecord: (id: string) => void;
 }
 
-export const useFavoritesStore = create<FavoritesStore>()(
+export const useCustomsStore = create<CustomsStore>()(
   persist(
     (set) => ({
-      ids: [],
-      addFavorite: (id) =>
-        set((state) => ({ ids: [...state.ids, id] })),
-      removeFavorite: (id) =>
-        set((state) => ({ ids: state.ids.filter((i) => i !== id) })),
+      records: [],
+      isLoading: false,
+      addRecord: (productName) =>
+        set((state) => ({
+          records: [
+            ...state.records,
+            { id: Date.now().toString(), productName, status: 'Pendiente', createdAt: Date.now() },
+          ],
+        })),
+      removeRecord: (id) =>
+        set((state) => ({
+          records: state.records.filter((r) => r.id !== id),
+        })),
     }),
     {
-      // Clave única de AsyncStorage para este store
-      name: 'favorites-storage',
-      // Adaptador para React Native (AsyncStorage)
+      name: 'customs-storage',           // ← clave en AsyncStorage
       storage: createJSONStorage(() => AsyncStorage),
     }
   )
 );
 ```
 
+> 💡 **Nota de sintaxis**: `create<T>()( persist( ... ) )` — el paréntesis vacío `()` después del genérico es necesario para que TypeScript infiera correctamente los tipos de los middlewares.
+
 ---
 
-## 5. Persistir solo parte del estado (`partialize`)
+## 4. Opciones avanzadas de persist
 
-No todo el estado debe persistirse — las sesiones de usuario, caches de red o estados de UI son volátiles:
+### `partialize` — elegir qué persistir
+
+No todo el estado debe guardarse. Los flags de UI (cargando, error, etc.) deben excluirse:
+
+```tsx
+persist(
+  (set) => ({
+    records: [],
+    isLoading: false,    // ← NO queremos persistir esto
+    hasHydrated: false,  // ← NO queremos persistir esto
+    addRecord: (name) => set((state) => ({ records: [...state.records, { ... }] })),
+  }),
+  {
+    name: 'customs-storage',
+    storage: createJSONStorage(() => AsyncStorage),
+    // Solo persiste `records`
+    partialize: (state) => ({ records: state.records }),
+  }
+)
+```
+
+### `onRehydrateStorage` — detectar fin de carga
+
+AsyncStorage es asíncrono. Cuando la app arranca, el store tiene valores iniciales (vacíos) hasta que los datos guardados se cargan. Puedes mostrar un loading:
+
+```tsx
+interface CustomsStore {
+  records: CustomsRecord[];
+  isLoading: boolean;
+  hasHydrated: boolean;
+  setHydrated: (value: boolean) => void;
+  // ...
+}
+
+export const useCustomsStore = create<CustomsStore>()(
+  persist(
+    (set) => ({
+      records: [],
+      isLoading: false,
+      hasHydrated: false,
+      setHydrated: (value) => set({ hasHydrated: value }),
+      // ...
+    }),
+    {
+      name: 'customs-storage',
+      storage: createJSONStorage(() => AsyncStorage),
+      onRehydrateStorage: () => (state) => {
+        // Se llama cuando AsyncStorage terminó de cargar
+        state?.setHydrated(true);
+      },
+    }
+  )
+);
+```
+
+```tsx
+// En el componente:
+function App(): React.JSX.Element {
+  const hasHydrated = useCustomsStore((state) => state.hasHydrated);
+
+  if (!hasHydrated) {
+    return <ActivityIndicator />;  // pantalla de carga
+  }
+
+  return <MainApp />;
+}
+```
+
+---
+
+## 5. Persist con slices
+
+Si usas slices, aplica `persist` al store combinado:
 
 ```tsx
 export const useAppStore = create<AppStore>()(
   persist(
     (set) => ({
-      // Persistir:
-      theme: 'dark',
-      language: 'es',
-      favoriteIds: [],
-      // NO persistir:
-      isLoading: false,
-      errorMessage: null,
-      // Acciones
-      setTheme: (theme) => set({ theme }),
+      ...createProductSlice(set),
+      ...createSupplierSlice(set),
+      ...createShipmentSlice(set),
     }),
     {
-      name: 'app-storage',
+      name: 'import-app-storage',
       storage: createJSONStorage(() => AsyncStorage),
-      // Solo persiste `theme`, `language` y `favoriteIds`
+      // Persistir solo productos y envíos (no proveedores seleccionados)
       partialize: (state) => ({
-        theme: state.theme,
-        language: state.language,
-        favoriteIds: state.favoriteIds,
+        products: state.products,
+        shipments: state.shipments,
       }),
     }
   )
@@ -177,52 +256,11 @@ export const useAppStore = create<AppStore>()(
 
 ---
 
-## 6. Detectar cuando el store fue rehidratado
-
-En React Native, AsyncStorage es asíncrono. El store puede tener valores iniciales por un breve instante antes de cargar los datos guardados:
-
-```tsx
-interface PersistedStore {
-  count: number;
-  increment: () => void;
-  // Campo especial: indica si persist terminó de cargar
-  _hasHydrated: boolean;
-  setHasHydrated: (value: boolean) => void;
-}
-
-export const usePersistedStore = create<PersistedStore>()(
-  persist(
-    (set) => ({
-      count: 0,
-      _hasHydrated: false,
-      increment: () => set((state) => ({ count: state.count + 1 })),
-      setHasHydrated: (value) => set({ _hasHydrated: value }),
-    }),
-    {
-      name: 'persisted-store',
-      storage: createJSONStorage(() => AsyncStorage),
-      onRehydrateStorage: () => (state) => {
-        // Se llama cuando persist termina de leer AsyncStorage
-        state?.setHasHydrated(true);
-      },
-    }
-  )
-);
-
-// En el componente raíz:
-function App() {
-  const hasHydrated = usePersistedStore((state) => state._hasHydrated);
-  if (!hasHydrated) return <LoadingScreen />;
-  return <NavigationContainer>...</NavigationContainer>;
-}
-```
-
----
-
 ## ✅ Checklist de Verificación
 
-- [ ] Los stores del proyecto están separados por dominio (auth, cart, filters)
-- [ ] `persist` usa `createJSONStorage(() => AsyncStorage)` (no la versión web)
-- [ ] `partialize` excluye estados volátiles (loaders, errores temporales)
-- [ ] `onRehydrateStorage` maneja el estado de carga inicial
-- [ ] El `name` de persist es único para cada store en la app
+- [ ] Los slices están correctamente tipados (cada uno con su interface)
+- [ ] El store combinado exporta un solo hook
+- [ ] `persist` configurado con `name` único y `AsyncStorage`
+- [ ] `partialize` excluye flags de UI (isLoading, hasHydrated)
+- [ ] `onRehydrateStorage` se usa para mostrar loading inicial
+- [ ] No se persisten datos sensibles o temporales

@@ -1,52 +1,50 @@
 // src/navigation/RootNavigator.tsx
-// Tab Navigator raíz con Stack anidado en la pestaña Home.
-// El badge del tab "Guardados" refleja el conteo del store Zustand.
+// Tab Navigator raíz con Stack anidado en la pestaña Products.
+// El badge del tab "Envíos" refleja el conteo del store Zustand.
 
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 
 import { DetailScreen } from '../screens/DetailScreen';
-import { HomeScreen } from '../screens/HomeScreen';
-import { SavedScreen } from '../screens/SavedScreen';
+import { HomeScreen as ProductsScreen } from '../screens/HomeScreen';
+import { ShipmentsScreen } from '../screens/ShipmentsScreen';
 import { COLORS } from '../theme';
-import type { HomeStackParamList, RootTabParamList } from './types';
+import type { ProductsStackParamList, RootTabParamList } from './types';
 
-// TODO: importar el store de guardados para leer el conteo del badge
-// import { useSavedStore } from '../stores/savedStore';
+// Lee el store de envíos para el badge
+import { useShipmentStore } from '../stores/shipmentStore';
 
-const HomeStack = createNativeStackNavigator<HomeStackParamList>();
+const ProductsStack = createNativeStackNavigator<ProductsStackParamList>();
 
-function HomeStackNavigator(): React.JSX.Element {
+function ProductsStackNavigator(): React.JSX.Element {
   return (
-    <HomeStack.Navigator
+    <ProductsStack.Navigator
       screenOptions={{
         headerStyle: { backgroundColor: COLORS.surface },
         headerTintColor: COLORS.accent,
         headerTitleStyle: { fontWeight: 'bold' as const },
       }}
     >
-      <HomeStack.Screen
-        name="HomeList"
-        component={HomeScreen}
-        // TODO: cambiar el título según tu dominio
-        options={{ title: 'Inicio' }}
+      <ProductsStack.Screen
+        name="ProductList"
+        component={ProductsScreen}
+        options={{ title: 'Productos' }}
       />
-      <HomeStack.Screen
-        name="HomeDetail"
+      <ProductsStack.Screen
+        name="ProductDetail"
         component={DetailScreen}
-        // Lee el nombre del ítem dinámicamente desde los params
         options={({ route }) => ({ title: route.params.name })}
       />
-    </HomeStack.Navigator>
+    </ProductsStack.Navigator>
   );
 }
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
 
 export function RootNavigator(): React.JSX.Element {
-  // TODO: leer el conteo de guardados desde el store para el badge
-  // const savedCount = useSavedStore((state) => state.items.length);
+  // Lee el conteo de envíos desde el store para el badge
+  const shipmentCount = useShipmentStore((state) => state.shipments.length);
 
   return (
     <Tab.Navigator
@@ -55,32 +53,28 @@ export function RootNavigator(): React.JSX.Element {
         tabBarActiveTintColor: COLORS.accent,
         tabBarInactiveTintColor: COLORS.textSecondary,
         tabBarStyle: { backgroundColor: COLORS.surface },
-        // TODO: implementar tabBarIcon para cada pestaña
-        // tabBarIcon: ({ focused, color, size }) => {
-        //   let iconName: keyof typeof Ionicons.glyphMap;
-        //   if (route.name === 'Home') {
-        //     iconName = focused ? 'home' : 'home-outline';
-        //   } else {
-        //     iconName = focused ? 'bookmark' : 'bookmark-outline';
-        //   }
-        //   return <Ionicons name={iconName} size={size} color={color} />;
-        // },
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName: keyof typeof Ionicons.glyphMap;
+          if (route.name === 'Products') {
+            iconName = focused ? 'cube' : 'cube-outline';
+          } else {
+            iconName = focused ? 'boat' : 'boat-outline';
+          }
+          return <Ionicons name={iconName} size={size} color={color} />;
+        },
       })}
     >
       <Tab.Screen
-        name="Home"
-        component={HomeStackNavigator}
-        // TODO: cambiar el label según tu dominio
-        options={{ tabBarLabel: 'Inicio' }}
+        name="Products"
+        component={ProductsStackNavigator}
+        options={{ tabBarLabel: 'Productos' }}
       />
       <Tab.Screen
-        name="Saved"
-        component={SavedScreen}
+        name="Shipments"
+        component={ShipmentsScreen}
         options={{
-          // TODO: cambiar el label según tu dominio
-          tabBarLabel: 'Guardados',
-          // TODO: descomentar y conectar al store para el badge dinámico
-          // tabBarBadge: savedCount > 0 ? savedCount : undefined,
+          tabBarLabel: 'Envíos',
+          tabBarBadge: shipmentCount > 0 ? shipmentCount : undefined,
         }}
       />
     </Tab.Navigator>

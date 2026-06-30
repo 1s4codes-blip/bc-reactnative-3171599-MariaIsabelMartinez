@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "week04-ejercicio-02",
+    "slug": "week04-ejercicio-02",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "web": {
+      "bundler": "metro"
+    },
+    "newArchEnabled": true
+  }
+}

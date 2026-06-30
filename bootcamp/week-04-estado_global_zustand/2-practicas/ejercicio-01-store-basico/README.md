@@ -4,6 +4,8 @@
 
 Crear un store Zustand con estado tipado, consumirlo en componentes usando selectores, y verificar que el estado es compartido sin prop drilling.
 
+**Dominio**: Empresa de Importación — SupplierStore + ShipmentItemStore
+
 ## 📋 Prerrequisitos
 
 - Teoría [01-zustand-fundamentos.md](../../1-teoria/01-zustand-fundamentos.md) leída
@@ -31,13 +33,13 @@ En Zustand, el store se crea con `create<Interface>()` que recibe una función c
 ```tsx
 import { create } from 'zustand';
 
-interface CounterStore {
+interface SupplierStore {
   count: number;
   increment: () => void;
   decrement: () => void;
 }
 
-const useCounterStore = create<CounterStore>((set) => ({
+const useSupplierStore = create<SupplierStore>((set) => ({
   count: 0,
   increment: () => set((state) => ({ count: state.count + 1 })),
   decrement: () => set((state) => ({ count: state.count - 1 })),
@@ -50,43 +52,42 @@ const useCounterStore = create<CounterStore>((set) => ({
 
 ## Paso 2 — Consumir el store con selector
 
-El selector es la función que le pasas al hook `useCounterStore`. Solo extrae la parte que el componente necesita.
+El selector es la función que le pasas al hook `useSupplierStore`. Solo extrae la parte que el componente necesita.
 
 ```tsx
 // Selector de solo el conteo (re-render solo cuando count cambia)
-const count = useCounterStore((state) => state.count);
+const count = useSupplierStore((state) => state.count);
 
 // Selector de solo las acciones (las acciones no cambian → no re-renderiza)
-const increment = useCounterStore((state) => state.increment);
+const increment = useSupplierStore((state) => state.increment);
 ```
 
 **Abre `starter/App.tsx`** y descomenta la sección **PASO 2**.
 
 ---
 
-## Paso 3 — Agregar un store de tareas (`TodoStore`)
+## Paso 3 — Agregar un store de productos para importar (`ShipmentItemStore`)
 
 Ahora añade un segundo store en el mismo archivo:
 
 ```tsx
-interface Todo {
+interface ShipmentItem {
   id: string;
-  text: string;
-  completed: boolean;
+  name: string;
 }
-interface TodoStore {
-  todos: Todo[];
-  addTodo: (text: string) => void;
-  removeTodo: (id: string) => void;
+interface ShipmentItemStore {
+  items: ShipmentItem[];
+  addItem: (name: string) => void;
+  removeItem: (id: string) => void;
 }
-const useTodoStore = create<TodoStore>((set) => ({
-  todos: [],
-  addTodo: (text) =>
+const useShipmentItemStore = create<ShipmentItemStore>((set) => ({
+  items: [],
+  addItem: (name) =>
     set((state) => ({
-      todos: [...state.todos, { id: Date.now().toString(), text, completed: false }],
+      items: [...state.items, { id: Date.now().toString(), name }],
     })),
-  removeTodo: (id) =>
-    set((state) => ({ todos: state.todos.filter((t) => t.id !== id) })),
+  removeItem: (id) =>
+    set((state) => ({ items: state.items.filter((t) => t.id !== id) })),
 }));
 ```
 
@@ -96,13 +97,13 @@ const useTodoStore = create<TodoStore>((set) => ({
 
 ## Paso 4 — Componente separado leyendo el mismo store
 
-El punto clave de Zustand: un componente `StatsPanel` que vive en otro lugar del árbol puede leer el mismo `useTodoStore` sin recibir props.
+El punto clave de Zustand: un componente `StatsPanel` que vive en otro lugar del árbol puede leer el mismo `useShipmentItemStore` sin recibir props.
 
 ```tsx
 // StatsPanel no recibe props — lee el store directamente
 function StatsPanel(): React.JSX.Element {
-  const count = useTodoStore((state) => state.todos.length);
-  return <Text>Total de tareas: {count}</Text>;
+  const count = useShipmentItemStore((state) => state.items.length);
+  return <Text>Total de productos: {count}</Text>;
 }
 ```
 
@@ -113,7 +114,7 @@ function StatsPanel(): React.JSX.Element {
 ## ✅ Validación
 
 La app debe mostrar:
-- Un contador con botones `+` y `−`
-- Un input para agregar tareas y una lista de tareas con botón eliminar
-- Un panel de estadísticas que se actualiza en tiempo real al agregar/eliminar tareas
+- Un contador de proveedores calificados con botones `+` y `−`
+- Un input para agregar productos a importar y una lista con botón eliminar
+- Un panel de estadísticas que se actualiza en tiempo real al agregar/eliminar productos
 - Sin errores TypeScript en la consola

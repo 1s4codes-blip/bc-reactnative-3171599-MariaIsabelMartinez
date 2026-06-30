@@ -1,8 +1,10 @@
 // App.tsx — Ejercicio 01: Store Básico con Zustand
-// Este ejercicio muestra cómo crear stores Zustand tipados y consumirlos
-// en múltiples componentes sin prop drilling.
+// Adaptado al dominio: Empresa de Importación
 //
-// INSTRUCCIONES: Ve descomentando los PASOx en orden.
+// PASO 1-2: SupplierStore — gestiona proveedores y su calificación
+// PASO 3-4: ShipmentItemStore — gestiona productos para importar
+//
+// INSTRUCCIONES: Descomenta los PASOx en orden.
 // Cada paso depende del anterior para funcionar correctamente.
 
 import { create } from 'zustand';
@@ -18,25 +20,25 @@ import {
 import { useState } from 'react';
 
 // ============================================================
-// PASO 1 — Definir y crear el store Counter
+// PASO 1 — Definir y crear el store SupplierStore
 // ============================================================
 // Un store Zustand tiene dos partes en la misma definición:
 //   - Estado (datos)
 //   - Acciones (funciones que modifican el estado)
 //
 // `set` recibe una función que devuelve el estado parcialmente actualizado.
-// Nunca se mutala el estado directamente (igual que con useState).
+// Nunca se muta el estado directamente (igual que con useState).
 
 // Descomenta las siguientes líneas:
-// interface CounterStore {
+// interface SupplierStore {
 //   count: number;
 //   increment: () => void;
 //   decrement: () => void;
 //   reset: () => void;
 // }
 //
-// const useCounterStore = create<CounterStore>((set) => ({
-//   // Estado inicial
+// const useSupplierStore = create<SupplierStore>((set) => ({
+//   // Estado inicial: proveedores calificados
 //   count: 0,
 //   // Acciones
 //   increment: () => set((state) => ({ count: state.count + 1 })),
@@ -45,35 +47,35 @@ import { useState } from 'react';
 // }));
 
 // ============================================================
-// PASO 3 — Definir y crear el store Todo
+// PASO 3 — Definir y crear el store ShipmentItemStore
 // ============================================================
 // Un segundo store completamente independiente.
 // Puedes tener tantos stores como necesites.
 
 // Descomenta las siguientes líneas:
-// interface Todo {
+// interface ShipmentItem {
 //   id: string;
-//   text: string;
+//   name: string;
 // }
 //
-// interface TodoStore {
-//   todos: Todo[];
-//   addTodo: (text: string) => void;
-//   removeTodo: (id: string) => void;
+// interface ShipmentItemStore {
+//   items: ShipmentItem[];
+//   addItem: (name: string) => void;
+//   removeItem: (id: string) => void;
 // }
 //
-// const useTodoStore = create<TodoStore>((set) => ({
-//   todos: [],
-//   addTodo: (text) =>
+// const useShipmentItemStore = create<ShipmentItemStore>((set) => ({
+//   items: [],
+//   addItem: (name) =>
 //     set((state) => ({
-//       todos: [
-//         ...state.todos,
-//         { id: Date.now().toString(), text },
+//       items: [
+//         ...state.items,
+//         { id: Date.now().toString(), name },
 //       ],
 //     })),
-//   removeTodo: (id) =>
+//   removeItem: (id) =>
 //     set((state) => ({
-//       todos: state.todos.filter((t) => t.id !== id),
+//       items: state.items.filter((t) => t.id !== id),
 //     })),
 // }));
 
@@ -81,16 +83,16 @@ import { useState } from 'react';
 // PANTALLA PRINCIPAL
 // ============================================================
 
-function CounterSection(): React.JSX.Element {
-  // PASO 2 — Consumir el store Counter con selectores
+function SupplierSection(): React.JSX.Element {
+  // PASO 2 — Consumir el store Supplier con selectores
   // Cada selector solo extrae la parte del store que necesita.
   // Este componente solo re-renderiza cuando `count` cambia.
   //
   // Descomenta las siguientes líneas:
-  // const count = useCounterStore((state) => state.count);
-  // const increment = useCounterStore((state) => state.increment);
-  // const decrement = useCounterStore((state) => state.decrement);
-  // const reset = useCounterStore((state) => state.reset);
+  // const count = useSupplierStore((state) => state.count);
+  // const increment = useSupplierStore((state) => state.increment);
+  // const decrement = useSupplierStore((state) => state.decrement);
+  // const reset = useSupplierStore((state) => state.reset);
 
   // Placeholder que desaparece cuando descomentas el PASO 2:
   const count = 0;
@@ -100,7 +102,7 @@ function CounterSection(): React.JSX.Element {
 
   return (
     <View style={styles.card}>
-      <Text style={styles.cardTitle}>Contador</Text>
+      <Text style={styles.cardTitle}>Proveedores Calificados</Text>
       <Text style={styles.counter}>{count}</Text>
       <View style={styles.row}>
         <Pressable style={styles.btn} onPress={decrement}>
@@ -117,36 +119,36 @@ function CounterSection(): React.JSX.Element {
   );
 }
 
-function TodoSection(): React.JSX.Element {
+function ShipmentItemSection(): React.JSX.Element {
   const [inputText, setInputText] = useState('');
 
-  // PASO 3 — Consumir el store Todo con selectores
+  // PASO 3 — Consumir el store ShipmentItem con selectores
   //
   // Descomenta las siguientes líneas:
-  // const todos = useTodoStore((state) => state.todos);
-  // const addTodo = useTodoStore((state) => state.addTodo);
-  // const removeTodo = useTodoStore((state) => state.removeTodo);
+  // const items = useShipmentItemStore((state) => state.items);
+  // const addItem = useShipmentItemStore((state) => state.addItem);
+  // const removeItem = useShipmentItemStore((state) => state.removeItem);
 
   // Placeholders:
-  const todos: { id: string; text: string }[] = [];
-  const addTodo = (_text: string) => {};
-  const removeTodo = (_id: string) => {};
+  const items: { id: string; name: string }[] = [];
+  const addItem = (_name: string) => {};
+  const removeItem = (_id: string) => {};
 
   function handleAdd(): void {
     if (inputText.trim() === '') return;
-    addTodo(inputText.trim());
+    addItem(inputText.trim());
     setInputText('');
   }
 
   return (
     <View style={styles.card}>
-      <Text style={styles.cardTitle}>Lista de tareas</Text>
+      <Text style={styles.cardTitle}>Productos para Importar</Text>
       <View style={styles.row}>
         <TextInput
           style={styles.input}
           value={inputText}
           onChangeText={setInputText}
-          placeholder="Nueva tarea..."
+          placeholder="Nuevo producto..."
           placeholderTextColor="#6e7681"
           onSubmitEditing={handleAdd}
         />
@@ -155,18 +157,18 @@ function TodoSection(): React.JSX.Element {
         </Pressable>
       </View>
       <FlatList
-        data={todos}
+        data={items}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View style={styles.todoRow}>
-            <Text style={styles.todoText}>{item.text}</Text>
-            <Pressable onPress={() => removeTodo(item.id)}>
+          <View style={styles.itemRow}>
+            <Text style={styles.itemText}>{item.name}</Text>
+            <Pressable onPress={() => removeItem(item.id)}>
               <Text style={styles.removeText}>✕</Text>
             </Pressable>
           </View>
         )}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>Sin tareas aún</Text>
+          <Text style={styles.emptyText}>Sin productos aún</Text>
         }
         scrollEnabled={false}
       />
@@ -176,15 +178,14 @@ function TodoSection(): React.JSX.Element {
 
 // PASO 4 — Componente separado que lee el mismo store sin recibir props
 // Esta es la demostración clave: StatsPanel no recibe ningún prop,
-// pero puede leer el useTodoStore directamente desde cualquier lugar del árbol.
+// pero puede leer el useShipmentItemStore directamente desde cualquier lugar del árbol.
 //
-// Descomenta la siguiente función (y el import correspondiente):
+// Descomenta la siguiente función:
 // function StatsPanel(): React.JSX.Element {
-//   // Selector: derivar un valor calculado del estado
-//   const totalCount = useTodoStore((state) => state.todos.length);
+//   const totalCount = useShipmentItemStore((state) => state.items.length);
 //   return (
 //     <View style={styles.statsPanel}>
-//       <Text style={styles.statsText}>Tareas en el store: {totalCount}</Text>
+//       <Text style={styles.statsText}>Productos en el store: {totalCount}</Text>
 //       <Text style={styles.statsHint}>
 //         (Sin prop drilling — lee el store directamente)
 //       </Text>
@@ -196,8 +197,8 @@ export default function App(): React.JSX.Element {
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Ejercicio 01 — Store Básico</Text>
-      <CounterSection />
-      <TodoSection />
+      <SupplierSection />
+      <ShipmentItemSection />
       {/* PASO 4 — Descomenta la siguiente línea cuando actives StatsPanel: */}
       {/* <StatsPanel /> */}
     </SafeAreaView>
@@ -288,14 +289,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  todoRow: {
+  itemRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 8,
     borderBottomWidth: 1,
     borderBottomColor: '#21262d',
   },
-  todoText: {
+  itemText: {
     flex: 1,
     fontSize: 14,
     color: '#e6edf3',

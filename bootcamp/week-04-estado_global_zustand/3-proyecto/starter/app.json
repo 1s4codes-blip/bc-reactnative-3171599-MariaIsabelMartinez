@@ -22,6 +22,18 @@
       },
       "package": "dev.bootcamp.week04zustand"
     },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/favicon.png"
+    },
+    "experiments": {
+      "turboModules": false
+    },
+    "extra": {
+      "router": {
+        "root": ""
+      }
+    },
     "newArchEnabled": true
   }
 }

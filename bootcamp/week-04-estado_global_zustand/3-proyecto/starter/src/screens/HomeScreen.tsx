@@ -1,6 +1,6 @@
 // src/screens/HomeScreen.tsx
-// Pantalla principal: lista de ítems con navegación al detalle.
-// El estudiante debe adaptar el diseño y los campos a su dominio.
+// Pantalla principal: catálogo de productos importados.
+// Muestra lista de productos con proveedor, origen y precio.
 
 import React from 'react';
 import {
@@ -14,45 +14,49 @@ import {
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
 
-import { ITEMS } from '../data/mockData';
+import { PRODUCTS } from '../data/mockData';
 import { COLORS, RADIUS, SPACING, TYPOGRAPHY } from '../theme';
-import type { Item } from '../types';
-import type { HomeStackParamList } from '../navigation/types';
+import type { Product } from '../types';
+import type { ProductsStackParamList } from '../navigation/types';
 
-type HomeScreenNavProp = NativeStackNavigationProp<HomeStackParamList, 'HomeList'>;
+type ProductsScreenNavProp = NativeStackNavigationProp<ProductsStackParamList, 'ProductList'>;
 
 // ============================================================
-// SUB-COMPONENTE: ItemCard
+// SUB-COMPONENTE: ProductCard
 // ============================================================
-// TODO: adaptar la tarjeta a las propiedades específicas de tu dominio.
-//   Mostrar, por ejemplo, price (Farmacia), author (Biblioteca), etc.
-
-interface ItemCardProps {
-  item: Item;
+interface ProductCardProps {
+  product: Product;
   onPress: () => void;
 }
 
-function ItemCard({ item, onPress }: ItemCardProps): React.JSX.Element {
+function ProductCard({ product, onPress }: ProductCardProps): React.JSX.Element {
   return (
     <Pressable
       style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
       onPress={onPress}
-      testID={`item-card-${item.id}`}
+      testID={`product-card-${product.id}`}
     >
-      {/* Placeholder del thumbnail */}
       <View style={styles.thumbnail}>
-        {/* TODO: reemplazar con imagen real usando expo-image o Image */}
-        <Text style={styles.thumbnailText}>{item.name.charAt(0)}</Text>
+        <Text style={styles.thumbnailText}>{product.name.charAt(0)}</Text>
       </View>
 
       <View style={styles.cardContent}>
         <Text style={styles.cardTitle} numberOfLines={1}>
-          {item.name}
+          {product.name}
+        </Text>
+        <Text style={styles.cardSupplier} numberOfLines={1}>
+          {product.supplier}
         </Text>
         <Text style={styles.cardDescription} numberOfLines={2}>
-          {item.description}
+          {product.description}
         </Text>
-        {/* TODO: agregar campos específicos de tu dominio aquí */}
+        <View style={styles.cardMeta}>
+          <Text style={styles.metaText}>{product.originCountry}</Text>
+          <Text style={styles.metaDot}>·</Text>
+          <Text style={styles.metaText}>${product.price.toFixed(2)}</Text>
+          <Text style={styles.metaDot}>·</Text>
+          <Text style={styles.metaText}>Cód. {product.hsCode}</Text>
+        </View>
       </View>
 
       <Text style={styles.chevron}>›</Text>
@@ -61,21 +65,23 @@ function ItemCard({ item, onPress }: ItemCardProps): React.JSX.Element {
 }
 
 // ============================================================
-// PANTALLA: HomeScreen
+// PANTALLA: ProductList (HomeScreen)
 // ============================================================
-
 export function HomeScreen(): React.JSX.Element {
-  const navigation = useNavigation<HomeScreenNavProp>();
+  const navigation = useNavigation<ProductsScreenNavProp>();
+  const products = PRODUCTS;
 
-  // TODO: leer los ítems desde un Zustand store (opcional bonus)
-  // o desde la API real de tu dominio (semana 5 — TanStack Query)
-  const items = ITEMS;
-
-  const renderItem: ListRenderItem<Item> = ({ item }) => (
-    <ItemCard
-      item={item}
+  const renderItem: ListRenderItem<Product> = ({ item }) => (
+    <ProductCard
+      product={item}
       onPress={() =>
-        navigation.navigate('HomeDetail', { id: item.id, name: item.name })
+        navigation.navigate('ProductDetail', {
+          id: item.id,
+          name: item.name,
+          supplier: item.supplier,
+          originCountry: item.originCountry,
+          price: item.price,
+        })
       }
     />
   );
@@ -83,19 +89,18 @@ export function HomeScreen(): React.JSX.Element {
   return (
     <View style={styles.container}>
       <FlatList
-        data={items}
+        data={products}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         contentContainerStyle={styles.list}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
-        // TODO: agregar un header con estadísticas (total de ítems, etc.)
         ListHeaderComponent={
           <Text style={styles.sectionLabel}>
-            {items.length} ítem{items.length !== 1 ? 's' : ''}
+            {products.length} producto{products.length !== 1 ? 's' : ''} importados
           </Text>
         }
         ListEmptyComponent={
-          <Text style={styles.emptyText}>No hay ítems disponibles.</Text>
+          <Text style={styles.emptyText}>No hay productos disponibles.</Text>
         }
       />
     </View>
@@ -105,7 +110,6 @@ export function HomeScreen(): React.JSX.Element {
 // ============================================================
 // ESTILOS
 // ============================================================
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -157,8 +161,26 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.body,
     fontWeight: '600',
   },
+  cardSupplier: {
+    ...TYPOGRAPHY.caption,
+    color: COLORS.accent,
+  },
   cardDescription: {
     ...TYPOGRAPHY.caption,
+  },
+  cardMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    flexWrap: 'wrap',
+  },
+  metaText: {
+    fontSize: 11,
+    color: COLORS.textSecondary,
+  },
+  metaDot: {
+    fontSize: 11,
+    color: COLORS.textMuted,
   },
   chevron: {
     ...TYPOGRAPHY.h2,

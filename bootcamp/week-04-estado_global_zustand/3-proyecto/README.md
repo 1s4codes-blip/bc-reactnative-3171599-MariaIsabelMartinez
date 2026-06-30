@@ -2,25 +2,37 @@
 
 ## 🎯 Objetivo
 
-Construir una app con **navegación Tab + Stack** y **estado global Zustand** aplicado a tu dominio. La segunda pestaña debe mostrar ítems "guardados" o un "carrito" cuyo estado viene de un store Zustand compartido con la pantalla principal.
+Construir una app con **navegación Tab + Stack** y **estado global Zustand** aplicado al dominio de una **Empresa de Importación**.
 
 ---
 
-## 📋 Tu Dominio Asignado
+## 📋 Dominio: Empresa de Importación
 
-**Dominio**: [El instructor te asignará tu dominio único al inicio del bootcamp]
+Sistema para gestionar el proceso de importación de productos desde diferentes proveedores internacionales.
 
-> 📌 Tu implementación debe ser coherente con tu dominio. No copies implementaciones de otros aprendices.
+### Entidades
 
-### 💡 Ejemplos de Adaptación por Dominio
+| Entidad | Descripción |
+|---|---|
+| **Suppliers** | Proveedores internacionales (TechSource China, AutoParts GmbH, etc.) |
+| **Products** | Catálogo de productos importables con código HS, precio, peso, país de origen |
+| **Shipments** | Envíos/embarques que el usuario arma con productos seleccionados |
+| **Customs** | Trámites aduaneros con estados (pending, in_review, cleared, held) |
 
-| Dominio | Pestaña Items (Home) | Store Zustand | Pestaña Guardados |
+### Mapas del Proyecto
+
+| Pestaña (Tab) | Stack | Store Zustand | Contenido |
 |---|---|---|---|
-| Biblioteca | Lista de libros | `useReadingListStore` | Lista de lectura |
-| Farmacia | Catálogo de medicamentos | `useCartStore` | Carrito de compra |
-| Gimnasio | Lista de rutinas | `useFavoritesStore` | Rutinas favoritas |
-| Restaurante | Menú del restaurante | `useOrderStore` | Mi pedido |
-| Cine | Cartelera actual | `useMyListStore` | Mi lista de pelis |
+| **Productos** | Lista → Detalle | `useShipmentStore` | Catálogo de productos importados |
+| **Envíos** | — | `useShipmentStore` | Envíos activos con seguimiento |
+
+### Funcionalidad por Pantalla
+
+| Pantalla | Función |
+|---|---|
+| `ProductList` | Catálogo con nombre, proveedor, país de origen, precio y código HS |
+| `ProductDetail` | Info completa del producto + botón "Agregar a envío" con cantidad |
+| `ShipmentsScreen` | Lista de envíos con estado (pendiente → en tránsito → aduana → entregado) |
 
 ---
 
@@ -34,19 +46,18 @@ starter/
 ├── tsconfig.json
 └── src/
     ├── navigation/
-    │   ├── RootNavigator.tsx    ← Tab + Stack anidado
-    │   └── types.ts             ← RootTabParamList, HomeStackParamList
+    │   ├── RootNavigator.tsx    ← Tab (Products + Shipments) + Stack anidado
+    │   └── types.ts             ← RootTabParamList, ProductsStackParamList
     ├── screens/
-    │   ├── HomeScreen.tsx       ← lista con botón "Guardar"
-    │   ├── DetailScreen.tsx     ← detalle + botón "Guardar/Quitar"
-    │   └── SavedScreen.tsx      ← segunda pestaña (desde el store)
+    │   ├── HomeScreen.tsx       ← catálogo de productos
+    │   ├── DetailScreen.tsx     ← detalle de producto + botón "Agregar a envío"
+    │   └── ShipmentsScreen.tsx  ← lista de envíos con seguimiento de estado
     ├── stores/
-    │   ├── itemsStore.ts        ← store del detalle seleccionado
-    │   └── savedStore.ts        ← store de ítems guardados (TODO)
+    │   └── shipmentStore.ts     ← store de envíos (Zustand)
     ├── data/
-    │   └── mockData.ts
+    │   └── mockData.ts          ← Productos y proveedores mock
     ├── types/
-    │   └── index.ts
+    │   └── index.ts             ← Product, Supplier, Shipment, CustomsRecord
     └── theme/
         └── index.ts
 ```
@@ -55,17 +66,17 @@ starter/
 
 ## ✅ Requisitos Funcionales
 
-1. **Tab Navigator** con al menos dos pestañas: `Home` y `Guardados`
-2. **Stack anidado en Home**: lista → detalle con params tipados
-3. **Store Zustand del carrito/guardados**: métodos para agregar, eliminar y limpiar
-4. **Badge en tab** con conteo en tiempo real desde el store (sin prop drilling)
-5. **Detalle** muestra botón "Guardar" / "Quitar" que lee y escribe el store
+1. **Tab Navigator** con dos pestañas: `Productos` y `Envíos`
+2. **Stack anidado en Productos**: lista → detalle con params tipados
+3. **Store Zustand de envíos**: métodos para agregar, eliminar, limpiar y actualizar estado
+4. **Badge en tab "Envíos"** con conteo en tiempo real desde el store (sin prop drilling)
+5. **Detalle** muestra botón "Agregar a envío" / "En envío" que lee y escribe el store
 
 ### Requisitos de Código
 
 - Creado con `create<Interface>()` sin `any`
 - Selectores específicos (no `useStore()` sin selector)
-- Mínimo 2 acciones en el store de guardados
+- Mínimo 2 acciones en el store de envíos
 - TypeScript sin errores de compilación
 
 ---
@@ -85,23 +96,11 @@ pnpm start
 1. App con Tab + Stack funcional y estado Zustand compartido entre pestañas
 2. Badge en el tab bar actualizado en tiempo real
 3. TypeScript sin errores, sin `any`
-4. Código y datos adaptados a tu dominio asignado
-5. Capturas de pantalla de Home, Detail y Saved screens
+4. Código y datos adaptados al dominio de importación
+5. Capturas de pantalla de Products, Detail y Shipments screens
 
 ---
 
 ## 📊 Criterios de Evaluación
 
 Ver [rubrica-evaluacion.md](../../rubrica-evaluacion.md) — sección **Producto 📦 (30%)**
-pnpm start
-```
-
-## 🛠️ Entregables
-
-1. App funcional en simulador iOS y/o Android
-2. Código adaptado a tu dominio
-3. README actualizado con descripción de tu implementación
-
-## 📊 Criterios de Evaluación
-
-Ver [../../rubrica-evaluacion.md](../../rubrica-evaluacion.md)

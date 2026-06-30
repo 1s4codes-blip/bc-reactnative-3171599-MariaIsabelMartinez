@@ -22,7 +22,7 @@
 |---|---|
 | Explica que `useState` es local al componente (no accesible desde otros) | 3 |
 | Explica que Zustand permite compartir estado entre cualquier componente sin prop drilling | 3 |
-| Da un ejemplo concreto de cuándo cada uno aplica (ej. estado de un input → `useState`; carrito de compras → Zustand) | 4 |
+| Da un ejemplo concreto de cuándo cada uno aplica (ej. estado de un input → `useState`; carrito/envíos → Zustand) | 4 |
 
 ### Pregunta 2 — 10 pts
 
@@ -63,18 +63,18 @@ const useCounterStore = create<CounterStore>((set) => ({
 
 ### Ejercicio 01 — Store básico (20 pts)
 
-**Objetivo**: Crear store con contador y lista de tareas, consumirlos en componentes separados.
+**Objetivo**: Crear store con calificación de proveedores y lista de productos para importar, consumirlos en componentes separados.
 
 | Criterio | Pts |
 |---|---|
-| PASO 1: Store definido con `create<TodoStore>()`, estado y acciones tipadas | 5 |
-| PASO 2: Selector específico en cada componente (`state => state.count` vs `state => state.todos`) | 5 |
-| PASO 3: Acciones `addTodo` / `removeTodo` funcionan correctamente con `set` | 5 |
+| PASO 1: Store definido con `create<StoreInterface>()`, estado y acciones tipadas | 5 |
+| PASO 2: Selector específico en cada componente (`state => state.count` vs `state => state.items`) | 5 |
+| PASO 3: Acciones `addItem` / `removeItem` funcionan correctamente con `set` | 5 |
 | PASO 4: Segundo componente consume el mismo store sin recibir props (no prop drilling) | 5 |
 
 ### Ejercicio 02 — Persist middleware (20 pts)
 
-**Objetivo**: Store con persist que sobrevive al reinicio de la app.
+**Objetivo**: Store con persist que sobrevive al reinicio de la app (trámites aduaneros).
 
 | Criterio | Pts |
 |---|---|
@@ -87,15 +87,15 @@ const useCounterStore = create<CounterStore>((set) => ({
 
 ## 📦 Producto (30 pts)
 
-**Criterios de la app del proyecto:**
+**Criterios de la app del proyecto (Empresa de Importación):**
 
 | Criterio | Pts |
 |---|---|
-| Tab Navigator funcional (mínimo 2 pestañas: Items + Carrito/Favoritos) | 5 |
-| Store del dominio creado con `create<StoreInterface>()` y tipos correctos | 5 |
-| Al menos 2 acciones en el store (agregar, eliminar o similar) | 5 |
+| Tab Navigator funcional (2 pestañas: Productos + Envíos) | 5 |
+| Store del dominio creado con `create<StoreInterface>()` y tipos correctos (Product, Supplier, Shipment) | 5 |
+| Al menos 2 acciones en el store (agregar a envío, eliminar, actualizar estado) | 5 |
 | Componente consumiendo store con selector (sin `any`) | 5 |
-| Badge en tab bar refleja conteo en tiempo real desde el store | 5 |
+| Badge en tab bar refleja conteo de envíos en tiempo real desde el store | 5 |
 | App funcional en simulador iOS y/o Android sin errores TypeScript | 5 |
 
 ### Penalizaciones
@@ -105,13 +105,13 @@ const useCounterStore = create<CounterStore>((set) => ({
 | Uso de `as any` en el store o selectores | −5 pts |
 | Copia de implementación de otro aprendiz (mismo dominio o lógica idéntica) | −15 pts |
 | App no corre en simulador | −10 pts |
-| Estado del carrito manejado con `useState` en lugar de Zustand | −5 pts |
+| Estado de los envíos manejado con `useState` en lugar de Zustand | −5 pts |
 
 ---
 
 ## Criterios Transversales
 
-- ✅ Implementación coherente con el dominio asignado
+- ✅ Implementación coherente con el dominio asignado (Empresa de Importación)
 - ✅ Sin copia de implementaciones de otros aprendices
 - ✅ App funcional en simulador iOS y/o Android
 - ✅ TypeScript sin errores de compilación (sin `any`)

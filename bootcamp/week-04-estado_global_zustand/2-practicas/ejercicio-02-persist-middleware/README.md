@@ -4,6 +4,8 @@
 
 Hacer que un store Zustand sobreviva al reinicio de la app usando el middleware `persist` con AsyncStorage como backend de almacenamiento.
 
+**Dominio**: Empresa de Importación — CustomsStore (trámites aduaneros)
+
 ## 📋 Prerrequisitos
 
 - Ejercicio 01 completado
@@ -28,16 +30,16 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const useNotesStore = create<NotesStore>()(
+const useCustomsStore = create<CustomsStore>()(
   persist(
     (set) => ({
-      notes: [],
-      addNote: (text) => set((state) => ({
-        notes: [...state.notes, { id: Date.now().toString(), text }]
+      records: [],
+      addRecord: (productName) => set((state) => ({
+        records: [...state.records, { id: Date.now().toString(), productName, status: 'Pendiente' }]
       })),
     }),
     {
-      name: 'notes-storage',  // clave en AsyncStorage
+      name: 'customs-storage',
       storage: createJSONStorage(() => AsyncStorage),
     }
   )
@@ -52,20 +54,20 @@ const useNotesStore = create<NotesStore>()(
 
 ## Paso 2 — Partial persist con `partialize`
 
-No todo el estado debe guardarse. Los flags de UI como `isLoading` o `errorMessage` deben excluirse:
+No todo el estado debe guardarse. Los flags de UI como `isLoading` o `hasHydrated` deben excluirse:
 
 ```tsx
 persist(
   (set) => ({
-    notes: [],
+    records: [],
     isLoading: false,  // ← no persistir
-    addNote: (text) => set(...),
+    addRecord: (productName) => set(...),
   }),
   {
-    name: 'notes-storage',
+    name: 'customs-storage',
     storage: createJSONStorage(() => AsyncStorage),
-    // Solo persiste `notes`, excluye `isLoading`
-    partialize: (state) => ({ notes: state.notes }),
+    // Solo persiste `records`, excluye `isLoading`
+    partialize: (state) => ({ records: state.records }),
   }
 )
 ```
@@ -82,7 +84,7 @@ AsyncStorage es asíncrono. Al abrir la app, hay un breve instante en que el sto
 persist(
   (set) => ({ ... }),
   {
-    name: 'notes-storage',
+    name: 'customs-storage',
     storage: createJSONStorage(() => AsyncStorage),
     onRehydrateStorage: () => (state) => {
       // Se llama cuando AsyncStorage terminó de cargar
@@ -100,12 +102,12 @@ persist(
 
 Para confirmar que funciona:
 
-1. Abre la app y agrega 2-3 notas
+1. Abre la app y agrega 2-3 productos para trámite aduanero
 2. **Cierra completamente la app** (swipe up en iOS, back en Android)
 3. Vuelve a abrirla
-4. Las notas deben seguir ahí
+4. Los trámites deben seguir ahí
 
-También puedes verificar con el campo "Datos guardados en AsyncStorage" que muestra cuántos ítems hay.
+También puedes verificar con el campo "Trámites en AsyncStorage" que muestra cuántos registros hay.
 
 **Abre `starter/App.tsx`** y descomenta la sección **PASO 4**.
 
@@ -113,7 +115,7 @@ También puedes verificar con el campo "Datos guardados en AsyncStorage" que mue
 
 ## ✅ Validación
 
-- [ ] Las notas persisten después de cerrar y reabrir la app
+- [ ] Los trámites aduaneros persisten después de cerrar y reabrir la app
 - [ ] Al reabrir la app, se muestra "Cargando..." brevemente (PASO 3)
 - [ ] `partialize` excluye `isLoading` correctamente (verificar en DevTools)
 - [ ] El campo `name` es único (no colisiona con otros stores)

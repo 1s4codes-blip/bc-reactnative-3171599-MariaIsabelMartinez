@@ -1,8 +1,9 @@
 // App.tsx — Ejercicio 02: Persist Middleware
+// Adaptado al dominio: Empresa de Importación — Trámites Aduaneros
 // Demuestra cómo usar el middleware `persist` de Zustand con AsyncStorage
-// para que el estado sobreviva al reinicio de la app.
+// para que los trámites aduaneros sobrevivan al reinicio de la app.
 //
-// INSTRUCCIONES: Descomenta los PASOx en orden y verifica que las notas
+// INSTRUCCIONES: Descomenta los PASOx en orden y verifica que los trámites
 // persisten al cerrar y reabrir la app.
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -31,46 +32,47 @@ import { useState } from 'react';
 // Descomenta las siguientes líneas:
 // import { persist, createJSONStorage } from 'zustand/middleware';
 //
-// interface Note {
+// interface CustomsRecord {
 //   id: string;
-//   text: string;
+//   productName: string;
+//   status: string;
 //   createdAt: number;
 // }
 //
-// interface NotesStore {
-//   notes: Note[];
+// interface CustomsStore {
+//   records: CustomsRecord[];
 //   isLoading: boolean;
 //   hasHydrated: boolean;
-//   addNote: (text: string) => void;
-//   removeNote: (id: string) => void;
+//   addRecord: (productName: string) => void;
+//   removeRecord: (id: string) => void;
 //   setHydrated: (value: boolean) => void;
 // }
 //
-// const useNotesStore = create<NotesStore>()(
+// const useCustomsStore = create<CustomsStore>()(
 //   persist(
 //     (set) => ({
-//       notes: [],
+//       records: [],
 //       isLoading: false,
 //       hasHydrated: false,
-//       addNote: (text) =>
+//       addRecord: (productName) =>
 //         set((state) => ({
-//           notes: [
-//             ...state.notes,
-//             { id: Date.now().toString(), text, createdAt: Date.now() },
+//           records: [
+//             ...state.records,
+//             { id: Date.now().toString(), productName, status: 'Pendiente', createdAt: Date.now() },
 //           ],
 //         })),
-//       removeNote: (id) =>
+//       removeRecord: (id) =>
 //         set((state) => ({
-//           notes: state.notes.filter((n) => n.id !== id),
+//           records: state.records.filter((r) => r.id !== id),
 //         })),
 //       setHydrated: (value) => set({ hasHydrated: value }),
 //     }),
 //     {
-//       name: 'notes-storage-v1',
+//       name: 'customs-storage-v1',
 //       storage: createJSONStorage(() => AsyncStorage),
-//       // PASO 2 — Solo persistir `notes` (excluir flags de UI)
+//       // PASO 2 — Solo persistir `records` (excluir flags de UI)
 //       // Descomenta la siguiente función:
-//       // partialize: (state) => ({ notes: state.notes }),
+//       // partialize: (state) => ({ records: state.records }),
 //       //
 //       // PASO 3 — Callback cuando AsyncStorage terminó de cargar
 //       // Descomenta las siguientes líneas:
@@ -89,46 +91,46 @@ export default function App(): React.JSX.Element {
   const [inputText, setInputText] = useState('');
 
   // PASO 1 — Consumir el store (descomenta cuando actives el store arriba)
-  // const notes = useNotesStore((state) => state.notes);
-  // const addNote = useNotesStore((state) => state.addNote);
-  // const removeNote = useNotesStore((state) => state.removeNote);
+  // const records = useCustomsStore((state) => state.records);
+  // const addRecord = useCustomsStore((state) => state.addRecord);
+  // const removeRecord = useCustomsStore((state) => state.removeRecord);
 
   // PASO 3 — Leer estado de hidratación
-  // const hasHydrated = useNotesStore((state) => state.hasHydrated);
+  // const hasHydrated = useCustomsStore((state) => state.hasHydrated);
 
   // Placeholders mientras el PASO 1 no está activo:
-  const notes: { id: string; text: string; createdAt: number }[] = [];
-  const addNote = (_text: string) => {};
-  const removeNote = (_id: string) => {};
+  const records: { id: string; productName: string; createdAt: number }[] = [];
+  const addRecord = (_productName: string) => {};
+  const removeRecord = (_id: string) => {};
 
   // PASO 3 — Mostrar pantalla de carga mientras rehidrata:
   // if (!hasHydrated) {
   //   return (
   //     <SafeAreaView style={styles.container}>
   //       <ActivityIndicator size="large" color="#61DAFB" />
-  //       <Text style={styles.loadingText}>Cargando datos guardados...</Text>
+  //       <Text style={styles.loadingText}>Cargando trámites aduaneros...</Text>
   //     </SafeAreaView>
   //   );
   // }
 
   function handleAdd(): void {
     if (inputText.trim() === '') return;
-    addNote(inputText.trim());
+    addRecord(inputText.trim());
     setInputText('');
   }
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Ejercicio 02 — Persist</Text>
+      <Text style={styles.title}>Ejercicio 02 — Persist (Aduanas)</Text>
 
       {/* PASO 4 — Info sobre persistencia */}
       {/* Descomenta las siguientes líneas cuando tengas el store activo: */}
       {/* <View style={styles.infoBox}>
         <Text style={styles.infoText}>
-          Notas guardadas en AsyncStorage: {notes.length}
+          Trámites en AsyncStorage: {records.length}
         </Text>
         <Text style={styles.infoHint}>
-          Cierra y reabre la app — las notas deben seguir aquí
+          Cierra y reabre la app — los trámites deben seguir aquí
         </Text>
       </View> */}
 
@@ -137,7 +139,7 @@ export default function App(): React.JSX.Element {
           style={styles.input}
           value={inputText}
           onChangeText={setInputText}
-          placeholder="Escribe una nota..."
+          placeholder="Producto para trámite aduanero..."
           placeholderTextColor="#6e7681"
           onSubmitEditing={handleAdd}
         />
@@ -147,30 +149,30 @@ export default function App(): React.JSX.Element {
       </View>
 
       <FlatList
-        data={notes}
+        data={records}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
         renderItem={({ item }) => (
-          <View style={styles.noteRow}>
-            <View style={styles.noteContent}>
-              <Text style={styles.noteText}>{item.text}</Text>
-              <Text style={styles.noteDate}>
+          <View style={styles.recordRow}>
+            <View style={styles.recordContent}>
+              <Text style={styles.recordText}>{item.productName}</Text>
+              <Text style={styles.recordDate}>
                 {new Date(item.createdAt).toLocaleTimeString('es-CO', {
                   hour: '2-digit',
                   minute: '2-digit',
                 })}
               </Text>
             </View>
-            <Pressable onPress={() => removeNote(item.id)}>
+            <Pressable onPress={() => removeRecord(item.id)}>
               <Text style={styles.removeText}>✕</Text>
             </Pressable>
           </View>
         )}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No hay notas guardadas.</Text>
+            <Text style={styles.emptyText}>No hay trámites aduaneros.</Text>
             <Text style={styles.emptyHint}>
-              Agrega una nota y reinicia la app para probar persist.
+              Agrega un producto y reinicia la app para probar persist.
             </Text>
           </View>
         }
@@ -245,7 +247,7 @@ const styles = StyleSheet.create({
   list: {
     gap: 8,
   },
-  noteRow: {
+  recordRow: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#161b22',
@@ -254,14 +256,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#30363d',
   },
-  noteContent: {
+  recordContent: {
     flex: 1,
   },
-  noteText: {
+  recordText: {
     fontSize: 14,
     color: '#e6edf3',
   },
-  noteDate: {
+  recordDate: {
     fontSize: 11,
     color: '#6e7681',
     marginTop: 2,
