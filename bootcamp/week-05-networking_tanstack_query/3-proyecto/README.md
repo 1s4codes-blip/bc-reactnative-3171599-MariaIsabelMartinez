@@ -8,7 +8,13 @@ Construir una app que consume una **API REST real** usando Axios y TanStack Quer
 
 ## 📋 Tu Dominio Asignado
 
-**Dominio**: _El instructor te asignará tu dominio_
+**Dominio**: Empresa de importación
+
+Entidades del dominio:
+- **Suppliers** — proveedores internacionales
+- **Products** — productos importados (entidad principal del CRUD)
+- **Shipments** — envíos y logística
+- **Customs** — estado aduanal (pendiente, en aduana, liberado, en tránsito, entregado)
 
 Todos los aprendices implementan la misma arquitectura (Axios + TanStack Query) aplicada a su contexto único.
 
@@ -24,6 +30,7 @@ Todos los aprendices implementan la misma arquitectura (Axios + TanStack Query) 
 | Restaurante | `/dishes` | `{ id, name, price, category }` |
 | Cine | `/movies` | `{ id, title, director, duration }` |
 | Hotel | `/rooms` | `{ id, number, type, pricePerNight }` |
+| **Importación** | `/products` | `{ id, name, supplier, originCountry, price, stock, customsStatus }` |
 
 > **API de práctica**: Usa [JSONPlaceholder](https://jsonplaceholder.typicode.com/) (`/posts` como proxy) o [MockAPI](https://mockapi.io/) para crear tu propio endpoint del dominio.
 
@@ -53,8 +60,7 @@ starter/
     ├── services/
     │   └── api.ts                # Instancia Axios con baseURL
     ├── hooks/
-    │   ├── useItems.ts           # useQuery para listar ítems
-    │   └── useCreateItem.ts      # useMutation para crear ítems
+    │   └── useProducts.ts        # useQuery + useMutation para productos importados
     ├── navigation/
     │   ├── types.ts              # Tipos de navegación
     │   └── RootNavigator.tsx     # Stack con 3 pantallas
@@ -90,7 +96,7 @@ Implementar los conceptos de **Networking y TanStack Query v5** aplicados a tu d
 
 ## 📋 Tu Dominio Asignado
 
-**Dominio**: [El instructor te asignará tu dominio único al inicio del bootcamp]
+**Dominio**: Empresa de importación (suppliers, products, shipments, customs)
 
 > 📌 Recuerda: tu implementación debe ser coherente con tu dominio.
 > No copies implementaciones de otros aprendices.

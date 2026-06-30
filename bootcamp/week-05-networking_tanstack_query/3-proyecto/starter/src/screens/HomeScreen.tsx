@@ -1,6 +1,5 @@
 // src/screens/HomeScreen.tsx
-// Pantalla principal: lista de ítems cargada desde la API.
-// TODO: conectar con useItems() y manejar todos los estados de red.
+// Pantalla principal: lista de productos importados cargada desde la API.
 
 import React from 'react';
 import {
@@ -16,48 +15,64 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { COLORS, RADIUS, SPACING, TYPOGRAPHY } from '../theme';
-import type { Item } from '../types';
+import { CUSTOMS_STATUS_LABELS, type Product } from '../types';
 import type { RootStackParamList } from '../navigation/types';
-
-// TODO: importar el hook de fetching
-// import { useItems } from '../hooks/useItems';
+import { useProducts } from '../hooks/useProducts';
 
 type HomeNavProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
 // ============================================================
-// SUB-COMPONENTE: ItemCard
+// MAPA DE COLORES PARA CADA ESTADO ADUANAL
 // ============================================================
 
-interface ItemCardProps {
-  item: Item;
+const STATUS_COLORS: Record<Product['customsStatus'], string> = {
+  pending: COLORS.warning,
+  in_customs: '#d4760a',
+  cleared: COLORS.success,
+  in_transit: COLORS.accent,
+  delivered: COLORS.success,
+};
+
+// ============================================================
+// SUB-COMPONENTE: ProductCard
+// ============================================================
+
+interface ProductCardProps {
+  product: Product;
   onPress: () => void;
 }
 
-function ItemCard({ item, onPress }: ItemCardProps): React.JSX.Element {
+function ProductCard({ product, onPress }: ProductCardProps): React.JSX.Element {
+  const statusColor = STATUS_COLORS[product.customsStatus];
+
   return (
     <Pressable
       style={({ pressed }) => [styles.card, pressed && { opacity: 0.7 }]}
       onPress={onPress}
-      testID={`item-card-${item.id}`}
+      testID={`product-card-${product.id}`}
     >
       <View style={styles.cardAvatar}>
-        {/* TODO: mostrar imagen del ítem si tu API la provee */}
         <Text style={styles.cardAvatarText}>
-          {String(item.name).charAt(0).toUpperCase()}
+          {product.name.charAt(0).toUpperCase()}
         </Text>
       </View>
       <View style={styles.cardContent}>
         <Text style={styles.cardTitle} numberOfLines={1}>
-          {/* TODO: cambiar 'name' por el campo principal de tu dominio */}
-          {item.name}
+          {product.name}
         </Text>
-        {item.description && (
-          <Text style={styles.cardSubtitle} numberOfLines={2}>
-            {item.description}
+        <Text style={styles.cardSubtitle} numberOfLines={1}>
+          {product.supplier} · {product.originCountry}
+        </Text>
+        <View style={styles.cardFooter}>
+          <Text style={styles.cardPrice}>
+            ${product.price.toFixed(2)}
           </Text>
-        )}
-        {/* TODO: mostrar campos adicionales de tu dominio */}
-        {/* Ejemplo: <Text style={styles.badge}>{item.price} €</Text> */}
+          <View style={[styles.statusBadge, { backgroundColor: statusColor + '22', borderColor: statusColor }]}>
+            <Text style={[styles.statusText, { color: statusColor }]}>
+              {CUSTOMS_STATUS_LABELS[product.customsStatus]}
+            </Text>
+          </View>
+        </View>
       </View>
       <Text style={styles.chevron}>›</Text>
     </Pressable>
@@ -70,36 +85,23 @@ function ItemCard({ item, onPress }: ItemCardProps): React.JSX.Element {
 
 export function HomeScreen(): React.JSX.Element {
   const navigation = useNavigation<HomeNavProp>();
+  const { data, isLoading, isError, isFetching, refetch, error } = useProducts();
 
-  // TODO: reemplaza este bloque con el hook real
-  // ──────────────────────────────────────────
-  // const { data, isLoading, isError, isFetching, refetch, error } = useItems();
-  //
-  // Placeholders hasta que implementes el hook:
-  const isLoading = false;
-  const isError = false;
-  const isFetching = false;
-  const data: Item[] | undefined = undefined;
-  const refetch = (): void => {};
-  const error: Error | null = null;
-
-  // ── Estados de carga ─────────────────────────────────────
-
-  // TODO: mostrar spinner solo en el primer fetch (sin caché)
+  // ── Estado de carga ───────────────────────────────────────
   if (isLoading) {
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" color={COLORS.accent} />
-        <Text style={styles.loadingText}>Cargando...</Text>
+        <Text style={styles.loadingText}>Cargando productos...</Text>
       </View>
     );
   }
 
-  // TODO: mostrar error con botón de reintentar
+  // ── Estado de error ───────────────────────────────────────
   if (isError) {
     return (
       <View style={styles.centered}>
-        <Text style={styles.errorText}>❌ No se pudo cargar la lista</Text>
+        <Text style={styles.errorText}>❌ No se pudo cargar el catálogo</Text>
         <Text style={styles.errorDetail}>{(error as Error)?.message}</Text>
         <Pressable style={styles.retryButton} onPress={refetch}>
           <Text style={styles.retryButtonText}>Reintentar</Text>
@@ -108,13 +110,13 @@ export function HomeScreen(): React.JSX.Element {
     );
   }
 
-  const renderItem: ListRenderItem<Item> = ({ item }) => (
-    <ItemCard
-      item={item}
+  const renderItem: ListRenderItem<Product> = ({ item }) => (
+    <ProductCard
+      product={item}
       onPress={() =>
         navigation.navigate('Detail', {
           id: item.id,
-          name: String(item.name),
+          name: item.name,
         })
       }
     />
@@ -125,7 +127,7 @@ export function HomeScreen(): React.JSX.Element {
       {!data ? (
         <View style={styles.centered}>
           <Text style={styles.hint}>
-            Implementa useItems() en src/hooks/useItems.ts para ver los datos
+            Conecta la API de productos para ver los datos
           </Text>
         </View>
       ) : (
@@ -135,17 +137,16 @@ export function HomeScreen(): React.JSX.Element {
           renderItem={renderItem}
           contentContainerStyle={styles.list}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
-          // TODO: pull-to-refresh con refetch
           onRefresh={refetch}
           refreshing={isFetching && !isLoading}
           ListEmptyComponent={
             <View style={styles.centered}>
-              <Text style={styles.emptyText}>No hay ítems disponibles.</Text>
+              <Text style={styles.emptyText}>No hay productos en el catálogo.</Text>
             </View>
           }
           ListHeaderComponent={
             <Text style={styles.countLabel}>
-              {data.length} ítem{data.length !== 1 ? 's' : ''}
+              {data.length} producto{data.length !== 1 ? 's' : ''} importado{data.length !== 1 ? 's' : ''}
             </Text>
           }
         />
@@ -190,6 +191,27 @@ const styles = StyleSheet.create({
   cardContent: { flex: 1, gap: SPACING.xs },
   cardTitle: { ...TYPOGRAPHY.body, fontWeight: '600' },
   cardSubtitle: { ...TYPOGRAPHY.caption },
+  cardFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: SPACING.xs,
+  },
+  cardPrice: {
+    ...TYPOGRAPHY.body,
+    fontWeight: '700',
+    color: COLORS.success,
+  },
+  statusBadge: {
+    borderWidth: 1,
+    borderRadius: RADIUS.sm,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 2,
+  },
+  statusText: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
   chevron: { ...TYPOGRAPHY.h2, color: COLORS.textMuted },
   centered: {
     flex: 1,

@@ -16,7 +16,7 @@ import axios from 'axios';
 // Expo expone variables de entorno con prefijo EXPO_PUBLIC_
 // ej. en .env.local: EXPO_PUBLIC_API_URL=https://tu-api.com
 const API_BASE_URL =
-  process.env.EXPO_PUBLIC_API_URL ?? 'https://jsonplaceholder.typicode.com';
+  process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,

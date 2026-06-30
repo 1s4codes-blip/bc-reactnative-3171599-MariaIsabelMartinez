@@ -1,0 +1,80 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "Laptop HP ProBook 450",
+      "supplier": "TechSupply GmbH",
+      "originCountry": "Alemania",
+      "price": 899.99,
+      "stock": 15,
+      "customsStatus": "cleared",
+      "description": "Lote 2024-Q3, 50 unidades, factura INV-2024-8912"
+    },
+    {
+      "id": 2,
+      "name": "Sensor IoT de Temperatura",
+      "supplier": "Shenzhen Electronics Co.",
+      "originCountry": "China",
+      "price": 42.50,
+      "stock": 200,
+      "customsStatus": "in_customs",
+      "description": "Modelo ST-1000, lote CH-4512"
+    },
+    {
+      "id": 3,
+      "name": "Rodamiento de Precisión 6205",
+      "supplier": "Precision Parts Ltd",
+      "originCountry": "Japón",
+      "price": 12.30,
+      "stock": 500,
+      "customsStatus": "delivered"
+    },
+    {
+      "id": 4,
+      "name": "Panel Solar 400W",
+      "supplier": "EcoEnergy Solutions",
+      "originCountry": "Estados Unidos",
+      "price": 320.00,
+      "stock": 30,
+      "customsStatus": "in_transit",
+      "description": "Monocristalino, eficiencia 22.5%"
+    },
+    {
+      "id": 5,
+      "name": "Microcontrolador ARM Cortex-M4",
+      "supplier": "Shenzhen Electronics Co.",
+      "originCountry": "China",
+      "price": 8.75,
+      "stock": 1200,
+      "customsStatus": "pending"
+    },
+    {
+      "id": 6,
+      "name": "Acero Inoxidable 304 — Plancha 2m x 1m",
+      "supplier": "Metalurgica Milano S.p.A.",
+      "originCountry": "Italia",
+      "price": 245.00,
+      "stock": 8,
+      "customsStatus": "in_customs",
+      "description": "Calibre 16, grado alimenticio, con certificado de origen"
+    },
+    {
+      "id": 7,
+      "name": "Módulo GPS NEO-6M",
+      "supplier": "TechSupply GmbH",
+      "originCountry": "Alemania",
+      "price": 18.90,
+      "stock": 0,
+      "customsStatus": "pending"
+    },
+    {
+      "id": 8,
+      "name": "Cable USB-C Blindado 2m",
+      "supplier": "Shenzhen Electronics Co.",
+      "originCountry": "China",
+      "price": 3.45,
+      "stock": 3000,
+      "customsStatus": "delivered"
+    }
+  ]
+}

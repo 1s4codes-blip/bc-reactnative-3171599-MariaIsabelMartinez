@@ -1,39 +1,40 @@
 // src/types/index.ts
-// Interfaces del dominio del proyecto.
-// TODO: adaptar los campos a tu dominio asignado.
+// Interfaces del dominio: Empresa de importación
+// Entidades: products, suppliers, shipments, customs
 
 // ============================================================
-// MODELO PRINCIPAL — Item
+// MODELO PRINCIPAL — Product (producto importado)
 // ============================================================
-// Este es el modelo genérico del recurso de tu dominio.
-// Reemplaza o extiende esta interfaz con los campos reales de tu API.
-//
-// Ejemplos por dominio:
-//   Biblioteca  → Book:   { id, title, author, year, isbn }
-//   Farmacia    → Product:{ id, name, price, stock, category }
-//   Restaurante → Dish:   { id, name, price, category, spiceLevel }
-//   Cine        → Movie:  { id, title, director, duration, genre }
+// Representa un producto en el catálogo de importación.
+// Vinculado a un proveedor (supplier), con estado en aduana (customs).
 
-export interface Item {
+export interface Product {
   id: string | number;
-  // TODO: renombra este campo según tu dominio (title, name, etc.)
   name: string;
-  // TODO: agrega campos específicos de tu dominio
-  // Ejemplo (Biblioteca):
-  //   author: string;
-  //   year: number;
-  //   isbn?: string;
-  // Ejemplo (Farmacia):
-  //   price: number;
-  //   stock: number;
-  //   prescription: boolean;
+  supplier: string;
+  originCountry: string;
+  price: number;
+  stock: number;
+  customsStatus: 'pending' | 'in_customs' | 'cleared' | 'in_transit' | 'delivered';
   description?: string;
 }
 
 // ============================================================
 // PAYLOAD DE CREACIÓN
 // ============================================================
-// Lo que se envía en el POST para crear un nuevo ítem.
-// Generalmente es el modelo sin el campo `id` (lo asigna el servidor).
+// Lo que se envía en el POST para crear un nuevo producto.
+// El servidor asigna el id.
 
-export type CreateItemPayload = Omit<Item, 'id'>;
+export type CreateProductPayload = Omit<Product, 'id'>;
+
+// ============================================================
+// MAPA DE ESTADOS DE ADUANA — etiquetas en español para la UI
+// ============================================================
+
+export const CUSTOMS_STATUS_LABELS: Record<Product['customsStatus'], string> = {
+  pending: 'Pendiente',
+  in_customs: 'En Aduana',
+  cleared: 'Liberado',
+  in_transit: 'En Tránsito',
+  delivered: 'Entregado',
+};
