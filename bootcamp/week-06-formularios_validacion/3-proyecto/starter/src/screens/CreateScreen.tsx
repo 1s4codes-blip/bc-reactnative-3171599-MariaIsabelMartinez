@@ -1,6 +1,6 @@
 // src/screens/CreateScreen.tsx
-// Formulario para crear un nuevo ítem.
-// TODO: conectar useForm + zodResolver + useCreateItem mutation.
+// Formulario para registrar un nuevo producto de importación.
+// Usa React Hook Form + Zod para validación y TanStack Query para la mutation.
 
 import React from 'react';
 import {
@@ -15,18 +15,14 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 import { COLORS, RADIUS, SPACING, TYPOGRAPHY } from '../theme';
 import type { RootStackParamList } from '../navigation/types';
 import { FormField } from '../components/FormField';
-
-// TODO: importar useForm y zodResolver
-// import { useForm } from 'react-hook-form';
-// import { zodResolver } from '@hookform/resolvers/zod';
-// import { itemSchema, type ItemFormData } from '../schemas/itemSchema';
-
-// TODO: importar el hook de mutación
-// import { useCreateItem } from '../hooks/useItems';
+import { productSchema, type ProductFormData } from '../schemas/itemSchema';
+import { useCreateProduct } from '../hooks/useItems';
 
 type CreateNavProp = NativeStackNavigationProp<RootStackParamList, 'Create'>;
 
@@ -37,37 +33,30 @@ type CreateNavProp = NativeStackNavigationProp<RootStackParamList, 'Create'>;
 export function CreateScreen(): React.JSX.Element {
   const navigation = useNavigation<CreateNavProp>();
 
-  // TODO: inicializar useForm con zodResolver
-  // ─────────────────────────────────────────────
-  // const {
-  //   control,
-  //   handleSubmit,
-  //   formState: { errors, isSubmitting },
-  // } = useForm<ItemFormData>({
-  //   resolver: zodResolver(itemSchema),
-  //   defaultValues: { title: '', body: '' },
-  // });
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<ProductFormData>({
+    resolver: zodResolver(productSchema),
+    defaultValues: { name: '', description: '', price: undefined, originCountry: '' },
+  });
 
-  // TODO: inicializar la mutation
-  // const { mutate: createItem } = useCreateItem();
+  const { mutate: createProduct } = useCreateProduct();
 
-  // Placeholder hasta que implementes el TODO
-  const isSubmitting = false;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const errors: any = {};
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const control: any = undefined;
-
-  // TODO: implementar la función onSubmit
-  // ─────────────────────────────────────────────
-  // function onSubmit(data: ItemFormData): void {
-  //   createItem(
-  //     { title: data.title, body: data.body ?? '', userId: 1 },
-  //     {
-  //       onSuccess: () => navigation.goBack(),
-  //     },
-  //   );
-  // }
+  function onSubmit(data: ProductFormData): void {
+    createProduct(
+      {
+        name: data.name,
+        description: data.description ?? '',
+        price: data.price,
+        originCountry: data.originCountry,
+      },
+      {
+        onSuccess: () => navigation.goBack(),
+      },
+    );
+  }
 
   const canSubmit = !isSubmitting;
 
@@ -81,52 +70,54 @@ export function CreateScreen(): React.JSX.Element {
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.hint}>
-          Adapta los campos de este formulario a tu dominio asignado.
-        </Text>
-
-        {/* TODO: reemplaza los FormField con los campos de tu dominio */}
-
         <FormField
           control={control}
-          name="title"
-          label="Nombre *"
-          placeholder="Nombre del ítem…"
+          name="name"
+          label="Nombre del producto *"
+          placeholder="Ej: Sensor IoT 3000"
           returnKeyType="next"
-          errorMessage={errors.title?.message}
+          errorMessage={errors.name?.message}
         />
 
         <FormField
           control={control}
-          name="body"
+          name="description"
           label="Descripción"
-          placeholder="Descripción opcional…"
+          placeholder="Descripción del producto…"
           multiline
           numberOfLines={4}
           textAlignVertical="top"
-          errorMessage={errors.body?.message}
+          errorMessage={errors.description?.message}
         />
 
-        {/* TODO: agrega campos adicionales de tu dominio aquí */}
-        {/* Ejemplo para Farmacia:
         <FormField
           control={control}
           name="price"
-          label="Precio *"
+          label="Precio unitario (USD) *"
           placeholder="0.00"
           keyboardType="numeric"
+          returnKeyType="next"
           errorMessage={errors.price?.message}
-        /> */}
+        />
+
+        <FormField
+          control={control}
+          name="originCountry"
+          label="País de origen *"
+          placeholder="Ej: China, Alemania, Brasil"
+          returnKeyType="done"
+          errorMessage={errors.originCountry?.message}
+        />
 
         <View style={styles.actions}>
           <Pressable
             style={[styles.button, !canSubmit && styles.buttonDisabled]}
-            // onPress={handleSubmit(onSubmit)}   ← descomentar al implementar
+            onPress={handleSubmit(onSubmit)}
             disabled={!canSubmit}
           >
             {isSubmitting
               ? <ActivityIndicator size="small" color={COLORS.background} />
-              : <Text style={styles.buttonText}>Crear ítem</Text>
+              : <Text style={styles.buttonText}>Crear producto</Text>
             }
           </Pressable>
 
@@ -148,7 +139,6 @@ const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: COLORS.background },
   container: { flex: 1 },
   content: { padding: SPACING.lg, gap: SPACING.md, paddingBottom: SPACING.xxl },
-  hint: { ...TYPOGRAPHY.caption, fontStyle: 'italic' },
   actions: { gap: SPACING.sm, marginTop: SPACING.sm },
   button: {
     backgroundColor: COLORS.accent,

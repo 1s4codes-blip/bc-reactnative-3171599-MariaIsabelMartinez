@@ -1,11 +1,13 @@
 {
   "expo": {
-    "name": "week-06-formularios",
-    "slug": "week-06-formularios",
+    "name": "ImportApp",
+    "slug": "import-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "newArchEnabled": true,
+    "web": { "bundler": "metro" },
     "ios": { "supportsTablet": true },
-    "android": { "adaptiveIcon": { "foregroundImage": "./assets/adaptive-icon.png", "backgroundColor": "#111827" } }
+    "android": { "package": "com.importapp" },
+    "platforms": ["ios", "android", "web"]
   }
 }

@@ -1,7 +1,7 @@
 // src/screens/EditScreen.tsx
-// Formulario para editar un ítem existente.
+// Formulario para editar un producto de importación existente.
 // Carga los datos actuales del servidor y rellena el formulario con defaultValues.
-// TODO: conectar useItemById + reset en useEffect + useUpdateItem mutation.
+// Usa reset() en useEffect cuando los datos llegan.
 
 import React, { useEffect } from 'react';
 import {
@@ -17,18 +17,14 @@ import {
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 import { COLORS, RADIUS, SPACING, TYPOGRAPHY } from '../theme';
 import type { RootStackParamList } from '../navigation/types';
 import { FormField } from '../components/FormField';
-
-// TODO: importar useForm y zodResolver
-// import { useForm } from 'react-hook-form';
-// import { zodResolver } from '@hookform/resolvers/zod';
-// import { itemSchema, type ItemFormData } from '../schemas/itemSchema';
-
-// TODO: importar los hooks de datos
-// import { useItemById, useUpdateItem } from '../hooks/useItems';
+import { productSchema, type ProductFormData } from '../schemas/itemSchema';
+import { useProductById, useUpdateProduct } from '../hooks/useItems';
 
 type EditNavProp = NativeStackNavigationProp<RootStackParamList, 'Edit'>;
 type EditRouteProp = RouteProp<RootStackParamList, 'Edit'>;
@@ -42,68 +38,47 @@ export function EditScreen(): React.JSX.Element {
   const route = useRoute<EditRouteProp>();
   const { id } = route.params;
 
-  // TODO: obtener el ítem actual del servidor
-  // ─────────────────────────────────────────────
-  // const { data: item, isLoading } = useItemById(id);
+  // Obtener el producto actual del servidor
+  const { data: product, isLoading } = useProductById(id);
 
-  // Placeholder hasta que implementes el TODO
-  const isLoading = false;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const item: any = undefined;
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting, isDirty },
+  } = useForm<ProductFormData>({
+    resolver: zodResolver(productSchema),
+    defaultValues: { name: '', description: '', price: undefined, originCountry: '' },
+  });
 
-  // TODO: inicializar useForm con zodResolver
-  // ─────────────────────────────────────────────
-  // const {
-  //   control,
-  //   handleSubmit,
-  //   reset,
-  //   formState: { errors, isSubmitting, isDirty },
-  // } = useForm<ItemFormData>({
-  //   resolver: zodResolver(itemSchema),
-  //   defaultValues: { title: '', body: '' },
-  // });
+  const { mutate: updateProduct, isPending } = useUpdateProduct();
 
-  // Placeholders
-  const isSubmitting = false;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const errors: any = {};
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const control: any = undefined;
-  const isDirty = true;
-
-  // TODO: cuando el ítem se carga del servidor, rellenar el formulario.
-  // ─────────────────────────────────────────────
-  // Patrón clave de esta semana: reset() + useEffect
-  //
-  // useEffect(() => {
-  //   if (item) {
-  //     reset({
-  //       title: item.title,
-  //       body: item.body ?? '',
-  //       // TODO: agrega los campos de tu dominio aquí
-  //     });
-  //   }
-  // }, [item, reset]);
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // Cuando el producto se carga del servidor, rellenar el formulario
   useEffect(() => {
-    // Remove this useEffect once you implement the real one above.
-  }, [item]);
+    if (product) {
+      reset({
+        name: product.name,
+        description: product.description ?? '',
+        price: product.price,
+        originCountry: product.originCountry,
+      });
+    }
+  }, [product, reset]);
 
-  // TODO: inicializar la mutation de actualización
-  // const { mutate: updateItem, isPending } = useUpdateItem();
-  const isPending = false;
-
-  // TODO: implementar la función onSubmit
-  // ─────────────────────────────────────────────
-  // function onSubmit(data: ItemFormData): void {
-  //   updateItem(
-  //     { id, title: data.title, body: data.body ?? '', userId: 1 },
-  //     {
-  //       onSuccess: () => navigation.goBack(),
-  //     },
-  //   );
-  // }
+  function onSubmit(data: ProductFormData): void {
+    updateProduct(
+      {
+        id,
+        name: data.name,
+        description: data.description ?? '',
+        price: data.price,
+        originCountry: data.originCountry,
+      },
+      {
+        onSuccess: () => navigation.goBack(),
+      },
+    );
+  }
 
   const canSubmit = !isSubmitting && !isPending && isDirty;
 
@@ -127,38 +102,53 @@ export function EditScreen(): React.JSX.Element {
         keyboardShouldPersistTaps="handled"
       >
         <Text style={styles.hint}>
-          Los campos se rellenan automáticamente con los datos actuales del ítem.
+          Los campos se rellenan automáticamente con los datos actuales del producto.
           Modifica lo que necesites y guarda.
         </Text>
 
-        {/* TODO: usa los mismos FormField que en CreateScreen */}
-
         <FormField
           control={control}
-          name="title"
-          label="Nombre *"
-          placeholder="Nombre del ítem…"
+          name="name"
+          label="Nombre del producto *"
+          placeholder="Ej: Sensor IoT 3000"
           returnKeyType="next"
-          errorMessage={errors.title?.message}
+          errorMessage={errors.name?.message}
         />
 
         <FormField
           control={control}
-          name="body"
+          name="description"
           label="Descripción"
-          placeholder="Descripción opcional…"
+          placeholder="Descripción del producto…"
           multiline
           numberOfLines={4}
           textAlignVertical="top"
-          errorMessage={errors.body?.message}
+          errorMessage={errors.description?.message}
         />
 
-        {/* TODO: agrega los campos adicionales de tu dominio */}
+        <FormField
+          control={control}
+          name="price"
+          label="Precio unitario (USD) *"
+          placeholder="0.00"
+          keyboardType="numeric"
+          returnKeyType="next"
+          errorMessage={errors.price?.message}
+        />
+
+        <FormField
+          control={control}
+          name="originCountry"
+          label="País de origen *"
+          placeholder="Ej: China, Alemania, Brasil"
+          returnKeyType="done"
+          errorMessage={errors.originCountry?.message}
+        />
 
         <View style={styles.actions}>
           <Pressable
             style={[styles.button, !canSubmit && styles.buttonDisabled]}
-            // onPress={handleSubmit(onSubmit)}   ← descomentar al implementar
+            onPress={handleSubmit(onSubmit)}
             disabled={!canSubmit}
           >
             {isSubmitting || isPending

@@ -1,6 +1,5 @@
 // src/screens/HomeScreen.tsx
-// Lista de ítems con pull-to-refresh y acceso a Create / Edit.
-// Esta pantalla ya está funcional — no requiere TODOs.
+// Lista de productos importados con pull-to-refresh y acceso a Create / Edit.
 
 import React from 'react';
 import {
@@ -15,8 +14,8 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { COLORS, RADIUS, SPACING, TYPOGRAPHY } from '../theme';
-import { useItems } from '../hooks/useItems';
-import type { Item } from '../types';
+import { useProducts } from '../hooks/useItems';
+import type { Product } from '../types';
 import type { RootStackParamList } from '../navigation/types';
 
 type HomeNavProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
@@ -27,7 +26,7 @@ type HomeNavProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
 export function HomeScreen(): React.JSX.Element {
   const navigation = useNavigation<HomeNavProp>();
-  const { data, isLoading, isError, isFetching, refetch } = useItems();
+  const { data, isLoading, isError, isFetching, refetch } = useProducts();
 
   if (isLoading) {
     return (
@@ -40,7 +39,7 @@ export function HomeScreen(): React.JSX.Element {
   if (isError) {
     return (
       <View style={styles.centered}>
-        <Text style={styles.errorText}>No se pudo cargar la lista</Text>
+        <Text style={styles.errorText}>No se pudieron cargar los productos</Text>
         <Pressable style={styles.retryBtn} onPress={() => void refetch()}>
           <Text style={styles.retryText}>Reintentar</Text>
         </Pressable>
@@ -56,17 +55,17 @@ export function HomeScreen(): React.JSX.Element {
       keyExtractor={(item) => String(item.id)}
       refreshing={isFetching && !isLoading}
       onRefresh={refetch}
-      ListEmptyComponent={<Text style={styles.empty}>No hay ítems aún</Text>}
+      ListEmptyComponent={<Text style={styles.empty}>No hay productos aún</Text>}
       ListHeaderComponent={
         data?.length
-          ? <Text style={styles.count}>{data.length} ítems</Text>
+          ? <Text style={styles.count}>{data.length} productos</Text>
           : null
       }
       renderItem={({ item }) => (
-        <ItemRow
-          item={item}
+        <ProductRow
+          product={item}
           onPress={() =>
-            navigation.navigate('Edit', { id: item.id, name: item.title })
+            navigation.navigate('Edit', { id: item.id, name: item.name })
           }
         />
       )}
@@ -75,21 +74,23 @@ export function HomeScreen(): React.JSX.Element {
 }
 
 // ──────────────────────────────────────────────
-// SUB-COMPONENTE: fila de ítem
+// SUB-COMPONENTE: fila de producto
 // ──────────────────────────────────────────────
 
-interface ItemRowProps { item: Item; onPress: () => void }
+interface ProductRowProps { product: Product; onPress: () => void }
 
-function ItemRow({ item, onPress }: ItemRowProps): React.JSX.Element {
+function ProductRow({ product, onPress }: ProductRowProps): React.JSX.Element {
   return (
     <Pressable style={styles.row} onPress={onPress}>
       <View style={styles.rowLeft}>
         <View style={styles.avatar}>
-          <Text style={styles.avatarLetter}>{item.title.charAt(0).toUpperCase()}</Text>
+          <Text style={styles.avatarLetter}>{product.name.charAt(0).toUpperCase()}</Text>
         </View>
         <View style={styles.rowText}>
-          <Text style={styles.rowTitle} numberOfLines={1}>{item.title}</Text>
-          <Text style={styles.rowSub} numberOfLines={1}>{item.body}</Text>
+          <Text style={styles.rowTitle} numberOfLines={1}>{product.name}</Text>
+          {product.description ? (
+            <Text style={styles.rowSub} numberOfLines={1}>{product.description}</Text>
+          ) : null}
         </View>
       </View>
       <Text style={styles.chevron}>›</Text>
