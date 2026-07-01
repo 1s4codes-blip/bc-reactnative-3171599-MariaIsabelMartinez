@@ -1,6 +1,6 @@
 // src/screens/CreateScreen.tsx
-// Formulario para crear un nuevo ítem.
-// Reutilizado de semana 06 — ya implementado con RHF + Zod.
+// Formulario para registrar un nuevo producto de importación.
+// Adaptado del proyecto semana 06 con RHF + Zod.
 
 import React from 'react';
 import {
@@ -21,8 +21,8 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { COLORS, RADIUS, SPACING, TYPOGRAPHY } from '../theme';
 import type { RootStackParamList } from '../navigation/types';
 import { FormField } from '../components/FormField';
-import { itemSchema, type ItemFormData } from '../schemas/itemSchema';
-import { useCreateItem } from '../hooks/useItems';
+import { productSchema, type ProductFormData } from '../schemas/productSchema';
+import { useCreateProduct } from '../hooks/useProducts';
 
 type CreateNavProp = NativeStackNavigationProp<RootStackParamList, 'Create'>;
 
@@ -33,16 +33,30 @@ export function CreateScreen(): React.JSX.Element {
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<ItemFormData>({
-    resolver: zodResolver(itemSchema),
-    defaultValues: { title: '', body: '' },
+  } = useForm<ProductFormData>({
+    resolver: zodResolver(productSchema),
+    defaultValues: {
+      name: '',
+      description: '',
+      originCountry: '',
+      supplierName: '',
+      category: '',
+      price: undefined,
+    },
   });
 
-  const { mutate: createItem, isPending } = useCreateItem();
+  const { mutate: createProduct, isPending } = useCreateProduct();
 
-  function onSubmit(data: ItemFormData): void {
-    createItem(
-      { title: data.title, body: data.body ?? '', userId: 1 },
+  function onSubmit(data: ProductFormData): void {
+    createProduct(
+      {
+        name: data.name,
+        description: data.description ?? '',
+        originCountry: data.originCountry,
+        supplierName: data.supplierName,
+        category: data.category,
+        price: data.price,
+      },
       { onSuccess: () => navigation.goBack() },
     );
   }
@@ -59,31 +73,62 @@ export function CreateScreen(): React.JSX.Element {
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.hint}>
-          Adapta los campos a tu dominio asignado.
-        </Text>
-
         <FormField
           control={control}
-          name="title"
-          label="Nombre *"
-          placeholder="Nombre del ítem…"
+          name="name"
+          label="Nombre del producto *"
+          placeholder="Ej: Laptop HP ProBook"
           returnKeyType="next"
-          errorMessage={errors.title?.message}
+          errorMessage={errors.name?.message}
         />
 
         <FormField
           control={control}
-          name="body"
+          name="description"
           label="Descripción"
-          placeholder="Descripción opcional…"
+          placeholder="Especificaciones técnicas…"
           multiline
-          numberOfLines={4}
+          numberOfLines={3}
           textAlignVertical="top"
-          errorMessage={errors.body?.message}
+          errorMessage={errors.description?.message}
         />
 
-        {/* TODO: agrega campos adicionales de tu dominio */}
+        <FormField
+          control={control}
+          name="originCountry"
+          label="País de origen *"
+          placeholder="Ej: China, Alemania, Japón"
+          returnKeyType="next"
+          errorMessage={errors.originCountry?.message}
+        />
+
+        <FormField
+          control={control}
+          name="supplierName"
+          label="Proveedor *"
+          placeholder="Nombre del proveedor"
+          returnKeyType="next"
+          errorMessage={errors.supplierName?.message}
+        />
+
+        <FormField
+          control={control}
+          name="category"
+          label="Categoría *"
+          placeholder="Ej: Electrónica, Textiles, Maquinaria"
+          returnKeyType="next"
+          errorMessage={errors.category?.message}
+        />
+
+        <FormField
+          control={control}
+          name="price"
+          label="Precio (USD) *"
+          placeholder="0.00"
+          keyboardType="decimal-pad"
+          returnKeyType="done"
+          errorMessage={errors.price?.message}
+        />
 
         <View style={styles.actions}>
           <Pressable
@@ -93,7 +138,7 @@ export function CreateScreen(): React.JSX.Element {
           >
             {isSubmitting || isPending
               ? <ActivityIndicator size="small" color={COLORS.background} />
-              : <Text style={styles.buttonText}>Crear ítem</Text>
+              : <Text style={styles.buttonText}>Registrar producto</Text>
             }
           </Pressable>
 
@@ -110,7 +155,6 @@ const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: COLORS.background },
   container: { flex: 1 },
   content: { padding: SPACING.lg, gap: SPACING.md, paddingBottom: SPACING.xxl },
-  hint: { ...TYPOGRAPHY.caption, fontStyle: 'italic' },
   actions: { gap: SPACING.sm, marginTop: SPACING.sm },
   button: {
     backgroundColor: COLORS.accent,

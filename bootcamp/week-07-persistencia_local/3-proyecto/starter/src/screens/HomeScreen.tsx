@@ -1,7 +1,6 @@
 // src/screens/HomeScreen.tsx
-// Lista de ítems con soporte offline (caché AsyncStorage) y
-// respeto de las preferencias del usuario (orden, modo compacto).
-// Esta pantalla está COMPLETAMENTE IMPLEMENTADA — es el punto de partida.
+// Lista de productos con soporte offline (caché AsyncStorage),
+// estado de envío visible y respeto de preferencias del usuario.
 
 import React, { useCallback } from 'react';
 import {
@@ -13,57 +12,77 @@ import {
   View,
 } from 'react-native';
 import type { HomeScreenProps } from '../navigation/types';
-import { useItems } from '../hooks/useItems';
+import { useProducts } from '../hooks/useProducts';
 import { usePreferences } from '../hooks/usePreferences';
 import { COLORS, RADIUS, SPACING, TYPOGRAPHY } from '../theme';
-import type { Item } from '../types';
+import type { Product, ShipmentStatus } from '../types';
 
-// ─── Sub-componente: fila de ítem ────────────────────────────────────────────
+const STATUS_LABELS: Record<ShipmentStatus, { label: string; color: string }> = {
+  pending:   { label: 'Pendiente',   color: '#f59e0b' },
+  customs:   { label: 'En Aduana',   color: '#3b82f6' },
+  transit:   { label: 'En Tránsito', color: '#a855f7' },
+  delivered: { label: 'Entregado',   color: '#22c55e' },
+};
 
-interface ItemRowProps {
-  item: Item;
+interface ProductRowProps {
+  product: Product;
   compact: boolean;
 }
 
-function ItemRow({ item, compact }: ItemRowProps): React.JSX.Element {
+function ProductRow({ product, compact }: ProductRowProps): React.JSX.Element {
+  const statusInfo = STATUS_LABELS[product.shipmentStatus];
+
   return (
     <View style={[styles.row, compact && styles.rowCompact]}>
-      <View style={styles.avatar}>
-        <Text style={styles.avatarText}>{String(item.id)}</Text>
-      </View>
+      <View style={[styles.statusDot, { backgroundColor: statusInfo.color }]} />
       <View style={styles.rowContent}>
-        <Text style={styles.rowTitle} numberOfLines={compact ? 1 : 2}>
-          {item.title}
+        <Text style={styles.rowName} numberOfLines={compact ? 1 : 2}>
+          {product.name}
         </Text>
         {!compact && (
-          <Text style={styles.rowBody} numberOfLines={2}>
-            {item.body}
-          </Text>
+          <>
+            <Text style={styles.rowDetail} numberOfLines={1}>
+              {product.supplierName} · {product.originCountry}
+            </Text>
+            <Text style={styles.rowCategory}>{product.category}</Text>
+          </>
         )}
+        <View style={styles.rowBottom}>
+          <Text style={styles.rowPrice}>${product.price.toFixed(2)}</Text>
+          <View style={[styles.statusBadge, { backgroundColor: statusInfo.color + '20' }]}>
+            <Text style={[styles.statusText, { color: statusInfo.color }]}>
+              {statusInfo.label}
+            </Text>
+          </View>
+        </View>
       </View>
     </View>
   );
 }
 
-// ─── Pantalla ────────────────────────────────────────────────────────────────
-
 export function HomeScreen({ navigation }: HomeScreenProps): React.JSX.Element {
-  const { data, isLoading, isError, refetch, isFetching } = useItems();
-  const { sortOrder, compactMode } = usePreferences();
+  const { data, isLoading, isError, refetch, isFetching } = useProducts();
+  const { sortBy, sortDirection, compactMode } = usePreferences();
 
-  // Aplicar ordenación de la preferencia MMKV
-  const sortedItems = React.useMemo(() => {
-    if (!data?.items) return [];
-    return [...data.items].sort((a, b) =>
-      sortOrder === 'asc'
-        ? a.title.localeCompare(b.title)
-        : b.title.localeCompare(a.title),
-    );
-  }, [data?.items, sortOrder]);
+  const sortedProducts = React.useMemo(() => {
+    if (!data?.products) return [];
+    const items = [...data.products];
+    const dir = sortDirection === 'asc' ? 1 : -1;
+    items.sort((a, b) => {
+      switch (sortBy) {
+        case 'name':   return dir * a.name.localeCompare(b.name);
+        case 'price':  return dir * (a.price - b.price);
+        case 'origin': return dir * a.originCountry.localeCompare(b.originCountry);
+        case 'status': return dir * a.shipmentStatus.localeCompare(b.shipmentStatus);
+        default:       return 0;
+      }
+    });
+    return items;
+  }, [data?.products, sortBy, sortDirection]);
 
   const renderItem = useCallback(
-    ({ item }: { item: Item }) => (
-      <ItemRow item={item} compact={compactMode} />
+    ({ item }: { item: Product }) => (
+      <ProductRow product={item} compact={compactMode} />
     ),
     [compactMode],
   );
@@ -89,7 +108,6 @@ export function HomeScreen({ navigation }: HomeScreenProps): React.JSX.Element {
 
   return (
     <View style={styles.container}>
-      {/* Banner offline — visible cuando los datos vienen del cache */}
       {data?.source === 'cache' && (
         <View style={styles.offlineBanner}>
           <Text style={styles.offlineText}>
@@ -99,7 +117,7 @@ export function HomeScreen({ navigation }: HomeScreenProps): React.JSX.Element {
       )}
 
       <FlatList
-        data={sortedItems}
+        data={sortedProducts}
         keyExtractor={(item) => String(item.id)}
         renderItem={renderItem}
         contentContainerStyle={styles.list}
@@ -109,22 +127,21 @@ export function HomeScreen({ navigation }: HomeScreenProps): React.JSX.Element {
         ListHeaderComponent={
           <View style={styles.listHeader}>
             <Text style={styles.listHeaderText}>
-              {sortedItems.length} ítems · Orden: {sortOrder === 'asc' ? 'A→Z' : 'Z→A'}
+              {sortedProducts.length} productos · Orden: {sortBy}
+              {sortDirection === 'asc' ? ' ↑' : ' ↓'}
               {compactMode ? ' · Compacto' : ''}
             </Text>
           </View>
         }
         ListEmptyComponent={
           <View style={styles.centered}>
-            <Text style={TYPOGRAPHY.body}>No hay ítems</Text>
+            <Text style={TYPOGRAPHY.body}>No hay productos</Text>
           </View>
         }
       />
     </View>
   );
 }
-
-// ─── Estilos ─────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
@@ -155,16 +172,27 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   rowCompact: { paddingVertical: SPACING.sm },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: COLORS.accent,
-    justifyContent: 'center',
-    alignItems: 'center',
+  statusDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginTop: 6,
   },
-  avatarText: { color: '#fff', fontWeight: '700', fontSize: 13 },
   rowContent: { flex: 1, gap: 2 },
-  rowTitle: { ...TYPOGRAPHY.body, fontWeight: '600' },
-  rowBody: { ...TYPOGRAPHY.caption },
+  rowName: { ...TYPOGRAPHY.body, fontWeight: '600' },
+  rowDetail: { ...TYPOGRAPHY.caption },
+  rowCategory: { ...TYPOGRAPHY.caption, color: COLORS.accent },
+  rowBottom: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: SPACING.xs,
+  },
+  rowPrice: { ...TYPOGRAPHY.body, fontWeight: '700', color: COLORS.success },
+  statusBadge: {
+    borderRadius: RADIUS.sm,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 2,
+  },
+  statusText: { fontSize: 11, fontWeight: '700' },
 });

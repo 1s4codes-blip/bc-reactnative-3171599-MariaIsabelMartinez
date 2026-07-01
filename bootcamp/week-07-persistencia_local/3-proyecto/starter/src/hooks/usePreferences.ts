@@ -1,51 +1,33 @@
 // src/hooks/usePreferences.ts
 // Hook de preferencias del usuario almacenadas con MMKV.
-// TODO: implementar los hooks reactivos de MMKV.
+// Preferencias específicas del dominio de importación: ordenar por nombre/precio/origen/estado,
+// modo compacto y productos por página.
 
-// TODO: importar los hooks de MMKV
-// import { useMMKVString, useMMKVBoolean, useMMKVNumber } from 'react-native-mmkv';
-// import { storage } from '../storage/mmkv';
+import { useMMKVString, useMMKVBoolean, useMMKVNumber } from 'react-native-mmkv';
+import { storage } from '../storage/mmkv';
+import type { SortBy } from '../types';
 
-// ─── Claves de preferencias (evitar strings sueltos) ─────────────────────────
 const PREF_KEYS = {
-  SORT_ORDER:   'pref_sortOrder',
+  SORT_BY:      'pref_sortBy',
+  SORT_DIR:     'pref_sortDirection',
   COMPACT_MODE: 'pref_compactMode',
   ITEMS_PER_PAGE: 'pref_itemsPerPage',
-  // TODO: agrega claves específicas de tu dominio
-  // Ejemplo (Farmacia): SHOW_OUT_OF_STOCK: 'pref_showOutOfStock',
 } as const;
 
-// ─── Tipo de los valores de sortOrder ─────────────────────────────────────────
-export type SortOrder = 'asc' | 'desc';
+export type SortDirection = 'asc' | 'desc';
 
-// ─── Hook principal ────────────────────────────────────────────────────────────
 export function usePreferences() {
-  // TODO: reemplazar los useState por hooks de MMKV
-  // ─────────────────────────────────────────────
-  // const [sortOrder, setSortOrder]       = useMMKVString(PREF_KEYS.SORT_ORDER, storage);
-  // const [compactMode, setCompactMode]   = useMMKVBoolean(PREF_KEYS.COMPACT_MODE, storage);
-  // const [itemsPerPage, setItemsPerPage] = useMMKVNumber(PREF_KEYS.ITEMS_PER_PAGE, storage);
-
-  // Placeholder — reemplazar al implementar
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const sortOrder = 'asc';
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const setSortOrder = (_value: string | undefined) => {};
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const compactMode = false;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const setCompactMode = (_value: boolean | undefined) => {};
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const itemsPerPage = 10;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const setItemsPerPage = (_value: number | undefined) => {};
-
-  // TODO: agrega preferencias adicionales de tu dominio aquí
+  const [sortBy, setSortBy]             = useMMKVString(PREF_KEYS.SORT_BY, storage);
+  const [sortDir, setSortDir]           = useMMKVString(PREF_KEYS.SORT_DIR, storage);
+  const [compactMode, setCompactMode]   = useMMKVBoolean(PREF_KEYS.COMPACT_MODE, storage);
+  const [itemsPerPage, setItemsPerPage] = useMMKVNumber(PREF_KEYS.ITEMS_PER_PAGE, storage);
 
   return {
-    // Valores con defaults para evitar undefined
-    sortOrder: (sortOrder ?? 'asc') as SortOrder,
-    setSortOrder: (value: SortOrder) => setSortOrder(value),
+    sortBy: (sortBy ?? 'name') as SortBy,
+    setSortBy: (value: SortBy) => setSortBy(value),
+
+    sortDirection: (sortDir ?? 'asc') as SortDirection,
+    setSortDirection: (value: SortDirection) => setSortDir(value),
 
     compactMode: compactMode ?? false,
     setCompactMode,

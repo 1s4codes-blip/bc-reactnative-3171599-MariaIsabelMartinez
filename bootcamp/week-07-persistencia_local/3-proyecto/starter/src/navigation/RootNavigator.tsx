@@ -24,7 +24,7 @@ export function RootNavigator(): React.JSX.Element {
         name="Home"
         component={HomeScreen}
         options={({ navigation }) => ({
-          title: 'Ítems',
+          title: 'Importaciones',
           headerRight: () => (
             <Pressable
               onPress={() => navigation.navigate('Create')}
@@ -46,7 +46,7 @@ export function RootNavigator(): React.JSX.Element {
       <Stack.Screen
         name="Create"
         component={CreateScreen}
-        options={{ title: 'Crear ítem', presentation: 'modal' }}
+        options={{ title: 'Registrar producto', presentation: 'modal' }}
       />
       <Stack.Screen
         name="Settings"
